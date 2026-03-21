@@ -1,32 +1,49 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 {
-    [SerializeField] private MovementSettings settings; // ここに作成した設定ファイル
-    
+    // 操作対象のステート
+    public enum ControlState { Gravity, Speed, Friction }
+    [SerializeField] private MovementSettings settings;
+    [SerializeField] private TextMeshProUGUI statusText; // UI表示用
+
     private Rigidbody2D rb;
     private PlayerControls controls;
     private Vector2 moveInput;
     private bool isGrounded;
 
+    // ステート管理用
+    private ControlState currentState = ControlState.Gravity;
+    private float cooldownTimer = 10f; // 開始時も10秒クールタイム
+    private const float MaxCooldown = 10f;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         controls = new PlayerControls();
-        controls.Player.SetCallbacks(this); // 入力イベントをこのスクリプトで受け取る
+        controls.Player.SetCallbacks(this);
     }
 
     void OnEnable() => controls.Enable();
     void OnDisable() => controls.Disable();
 
-    // Input Action からの移動入力
-    public void OnMove(InputAction.CallbackContext context)
+    void Update()
     {
-        moveInput = context.ReadValue<Vector2>();
+        // クールタイムのカウントダウン
+        if (cooldownTimer > 0)
+        {
+            cooldownTimer -= Time.deltaTime;
+            if (cooldownTimer < 0) cooldownTimer = 0;
+        }
+
+        UpdateUI();
     }
 
-    // Input Action からのジャンプ入力
+    // 入力イベント
+    public void OnMove(InputAction.CallbackContext context) => moveInput = context.ReadValue<Vector2>();
+
     public void OnJump(InputAction.CallbackContext context)
     {
         if (context.started && isGrounded)
@@ -35,38 +52,68 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         }
     }
 
-    public void OnStateUp(InputAction.CallbackContext context)
+    // ステートを切り替える
+    public void OnCycleState(InputAction.CallbackContext context)
     {
         if (context.started)
         {
-            settings.gravityScale *= 2f;
-            if (settings.gravityScale > 4f) settings.gravityScale = 4f;
-            Debug.Log($"重力アップ！ 現在の重力: {settings.gravityScale}");
+            // Gravity -> Speed -> Friction -> Gravity... の順で切り替え
+            currentState = (ControlState)(((int)currentState + 1) % 3);
+            Debug.Log($"操作対象変更: {currentState}");
         }
     }
 
-    // 重力を半分にする
-    public void OnStateDown(InputAction.CallbackContext context)
+    // 値を上げる
+    public void OnStateUp(InputAction.CallbackContext context)
     {
-        if (context.started)
+        if (context.started && cooldownTimer <= 0)
         {
-            settings.gravityScale /= 2f;
-            if (settings.gravityScale < 1f) settings.gravityScale = 1f;
-            
-            Debug.Log($"重力ダウン！ 現在の重力: {settings.gravityScale}");
+            ApplyChange(2.0f); // 2倍にする
+            cooldownTimer = MaxCooldown;
         }
     }
+
+    // 値を下げる
+    public void OnStateDown(InputAction.CallbackContext context)
+    {
+        if (context.started && cooldownTimer <= 0)
+        {
+            ApplyChange(0.5f); // 半分にする
+            cooldownTimer = MaxCooldown;
+        }
+    }
+
+    // 実際の値変更ロジック
+    private void ApplyChange(float multiplier)
+    {
+        switch (currentState)
+        {
+            case ControlState.Gravity:
+                settings.gravityScale = Mathf.Clamp(settings.gravityScale * multiplier, 1f, 16f);
+                Debug.Log($"重力変更: {settings.gravityScale}");
+                break;
+            case ControlState.Speed:
+                settings.moveSpeed = Mathf.Clamp(settings.moveSpeed * multiplier, 2f, 32f);
+                Debug.Log($"速度変更: {settings.moveSpeed}");
+                break;
+            case ControlState.Friction:
+                settings.friction = Mathf.Clamp(settings.friction * multiplier, 4f, 64f);
+                Debug.Log($"摩擦変更: {settings.friction}");
+                break;
+        }
+    }
+
+    // 物理挙動
 
     void FixedUpdate()
     {
         ApplyMovement();
         ApplyFriction();
-        ApplyCustomGravity();
+        rb.gravityScale = settings.gravityScale;
     }
 
     private void ApplyMovement()
     {
-        // 入力方向への加速
         if (Mathf.Abs(moveInput.x) > 0.01f)
         {
             float targetVelX = moveInput.x * settings.moveSpeed;
@@ -76,7 +123,6 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
     private void ApplyFriction()
     {
-        // 地面にいて、入力がない時に摩擦を適用
         if (isGrounded && Mathf.Abs(moveInput.x) < 0.01f)
         {
             float newX = Mathf.MoveTowards(rb.linearVelocity.x, 0, settings.friction * Time.fixedDeltaTime);
@@ -84,13 +130,27 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         }
     }
 
-    private void ApplyCustomGravity()
+    // UI更新
+
+    private void UpdateUI()
     {
-        // 独自の重力計算（共有設定から反映）
-        rb.gravityScale = settings.gravityScale;
+        if (statusText == null) return;
+
+        string stateName = currentState switch
+        {
+            ControlState.Gravity => "重力 (Gravity)",
+            ControlState.Speed => "速度 (Speed)",
+            ControlState.Friction => "摩擦 (Friction)",
+            _ => ""
+        };
+
+        string cdStr = cooldownTimer > 0 ? $"<color=red>{cooldownTimer:F1}s</color>" : "<color=green>READY</color>";
+        
+        statusText.text = $"MODE: {stateName}\n" +
+                          $"COOLDOWN: {cdStr}\n" +
+                          $"G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
     }
 
-    // 接地判定（簡易版）
     private void OnCollisionStay2D(Collision2D collision) => isGrounded = true;
     private void OnCollisionExit2D(Collision2D collision) => isGrounded = false;
 }
