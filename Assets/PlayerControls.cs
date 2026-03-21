@@ -127,6 +127,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CycleState"",
+                    ""type"": ""Button"",
+                    ""id"": ""35e88876-88dc-4bad-b5a2-c999e7f3fba4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -349,6 +358,39 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""StateDown"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a7549c06-0a1a-410a-a186-24d8527b4c14"",
+                    ""path"": ""<Keyboard>/o"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleState"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""95144ee4-2397-4327-b5d5-8b99bdb71a3d"",
+                    ""path"": ""<Keyboard>/v"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleState"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b55faf88-47f3-4834-9b29-c040efaaf478"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CycleState"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -361,6 +403,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_StateUp = m_Player.FindAction("StateUp", throwIfNotFound: true);
         m_Player_StateDown = m_Player.FindAction("StateDown", throwIfNotFound: true);
+        m_Player_CycleState = m_Player.FindAction("CycleState", throwIfNotFound: true);
     }
 
     ~@PlayerControls()
@@ -445,6 +488,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_StateUp;
     private readonly InputAction m_Player_StateDown;
+    private readonly InputAction m_Player_CycleState;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -472,6 +516,10 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/StateDown".
         /// </summary>
         public InputAction @StateDown => m_Wrapper.m_Player_StateDown;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/CycleState".
+        /// </summary>
+        public InputAction @CycleState => m_Wrapper.m_Player_CycleState;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -510,6 +558,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @StateDown.started += instance.OnStateDown;
             @StateDown.performed += instance.OnStateDown;
             @StateDown.canceled += instance.OnStateDown;
+            @CycleState.started += instance.OnCycleState;
+            @CycleState.performed += instance.OnCycleState;
+            @CycleState.canceled += instance.OnCycleState;
         }
 
         /// <summary>
@@ -533,6 +584,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @StateDown.started -= instance.OnStateDown;
             @StateDown.performed -= instance.OnStateDown;
             @StateDown.canceled -= instance.OnStateDown;
+            @CycleState.started -= instance.OnCycleState;
+            @CycleState.performed -= instance.OnCycleState;
+            @CycleState.canceled -= instance.OnCycleState;
         }
 
         /// <summary>
@@ -601,5 +655,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnStateDown(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CycleState" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCycleState(InputAction.CallbackContext context);
     }
 }
