@@ -1509,7 +1509,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 048b22bd7ffee4f4581ffdad07a66b7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::scenechange
-  nextSceneName: Game
+  nextSceneName: (Test)
   fadeColor: {r: 0, g: 0, b: 0, a: 1}
   fadeDuration: 2
 --- !u!1 &1513171805
