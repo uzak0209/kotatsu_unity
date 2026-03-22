@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private PlayerControls controls;
     private Vector2 moveInput;
     private bool isGrounded;
+    private bool canMove = false; 
+    public void SetMoveAllowance(bool allowance) => canMove = allowance;
 
     // ステート管理用
     private ControlState currentState = ControlState.Gravity;
@@ -46,6 +48,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
     public void OnJump(InputAction.CallbackContext context)
     {
+        if (!canMove) return;
         if (context.started && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, settings.jumpForce);
@@ -107,6 +110,12 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
     void FixedUpdate()
     {
+        if (!canMove)
+        {
+            // 動けない時は速度をゼロにする
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
         ApplyMovement();
         ApplyFriction();
         rb.gravityScale = settings.gravityScale;
