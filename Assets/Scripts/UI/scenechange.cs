@@ -4,7 +4,7 @@ public class scenechange : MonoBehaviour
 {
     public string nextSceneName = "Game";
     public Color fadeColor = Color.black;
-    public float fadeDuration = 1f;
+    public float fadeDuration = 2f;
     private bool isActive = false;
 
     // ボタンのクリックイベントで呼び出すメソッド

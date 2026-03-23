@@ -43,9 +43,24 @@ public class GameFlowManager : MonoBehaviour
     }
 
     // ゴール時などに外部から呼ぶ用
-    public void EndGame(string winnerName)
+    public void OnPlayerGoal(string winnerName)
     {
+        // プレイヤーの操作を止める
         if (player != null) player.SetMoveAllowance(false);
-        countdownText.text = $"Winner: {winnerName}\nFINISHED!";
+
+        // 結果を表示
+        countdownText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
+
+        // 2秒後にタイトルへ戻るコルーチンを開始
+        StartCoroutine(ReturnToTitleRoutine());
+    }
+
+    private IEnumerator ReturnToTitleRoutine()
+    {
+        // 2秒待機
+        yield return new WaitForSeconds(2f);
+
+        // "Title" という名前のシーンに遷移
+        Initiate.Fade("Title", Color.black, 2f);
     }
 }
