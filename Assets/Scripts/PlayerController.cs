@@ -148,7 +148,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
                 if (logText != null) logText.text = $"あなたが速度変更:{settings.moveSpeed:F1}";
                 break;
             case ControlState.Friction:
-                settings.friction = Mathf.Clamp(settings.friction * multiplier, 2f, 32f);
+                settings.friction = Mathf.Clamp(settings.friction * multiplier, 4f, 64f);
                 Debug.Log($"摩擦変更: {settings.friction}");
                 if (logText != null) logText.text = $"あなたが摩擦変更:{settings.friction:F1}";
                 break;
