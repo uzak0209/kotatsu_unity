@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         controls.Player.SetCallbacks(this);
         settings.gravityScale = 4f; // 初期値
         settings.moveSpeed = 8f;
-        settings.friction = 16f;
+        settings.friction = 8f;
     }
 
     void OnEnable() => controls.Enable();
@@ -107,7 +107,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
                 logText.text = $"あなたが速度変更:{settings.moveSpeed:F1}";
                 break;
             case ControlState.Friction:
-                settings.friction = Mathf.Clamp(settings.friction * multiplier, 4f, 64f);
+                settings.friction = Mathf.Clamp(settings.friction * multiplier, 2f, 32f);
                 Debug.Log($"摩擦変更: {settings.friction}");
                 logText.text = $"あなたが摩擦変更:{settings.friction:F1}";
                 break;
