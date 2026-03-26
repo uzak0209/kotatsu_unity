@@ -4,28 +4,51 @@ using TMPro;
 
 public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 {
+    // キャラクターごとのSpriteセットを定義
+    [System.Serializable]
+    public struct CharacterSprites
+    {
+        public string characterName;
+        public Sprite groundRight;
+        public Sprite groundLeft;
+        public Sprite airRight;
+        public Sprite airLeft;
+    }
+
+    [Header("Visual Settings")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private CharacterSprites[] characterList; // 4体分
+    public int selectedCharacterIndex = 0;
+
     // 操作対象のステート
     public enum ControlState { Gravity, Speed, Friction }
     [SerializeField] private MovementSettings settings;
     [SerializeField] private TextMeshProUGUI statusText; // UI表示用
+    [SerializeField] private TextMeshProUGUI statusText2;
+    [SerializeField] private TextMeshProUGUI logText; // ログ表示用
 
     private Rigidbody2D rb;
     private PlayerControls controls;
     private Vector2 moveInput;
     private bool isGrounded;
     private bool canMove = false; 
+    private bool isFacingRight = true;
     public void SetMoveAllowance(bool allowance) => canMove = allowance;
 
     // ステート管理用
     private ControlState currentState = ControlState.Gravity;
-    private float cooldownTimer = 10f; // 開始時も10秒クールタイム
+    private float cooldownTimer = 13f; // 開始時も10秒クールタイム
     private const float MaxCooldown = 10f;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
         controls = new PlayerControls();
         controls.Player.SetCallbacks(this);
+        settings.gravityScale = 4f; // 初期値
+        settings.moveSpeed = 8f;
+        settings.friction = 8f;
     }
 
     void OnEnable() => controls.Enable();
@@ -41,6 +64,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         }
 
         UpdateUI();
+        UpdateSprite();
     }
 
     // 入力イベント
@@ -94,14 +118,17 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
             case ControlState.Gravity:
                 settings.gravityScale = Mathf.Clamp(settings.gravityScale * multiplier, 1f, 16f);
                 Debug.Log($"重力変更: {settings.gravityScale}");
+                logText.text = $"あなたが重力変更:{settings.gravityScale:F1}";
                 break;
             case ControlState.Speed:
                 settings.moveSpeed = Mathf.Clamp(settings.moveSpeed * multiplier, 2f, 32f);
                 Debug.Log($"速度変更: {settings.moveSpeed}");
+                logText.text = $"あなたが速度変更:{settings.moveSpeed:F1}";
                 break;
             case ControlState.Friction:
-                settings.friction = Mathf.Clamp(settings.friction * multiplier, 4f, 64f);
+                settings.friction = Mathf.Clamp(settings.friction * multiplier, 2f, 32f);
                 Debug.Log($"摩擦変更: {settings.friction}");
+                logText.text = $"あなたが摩擦変更:{settings.friction:F1}";
                 break;
         }
     }
@@ -147,17 +174,43 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
         string stateName = currentState switch
         {
-            ControlState.Gravity => "重力 (Gravity)",
-            ControlState.Speed => "速度 (Speed)",
-            ControlState.Friction => "摩擦 (Friction)",
+            ControlState.Gravity => "重力",
+            ControlState.Speed => "速度",
+            ControlState.Friction => "摩擦",
             _ => ""
         };
 
         string cdStr = cooldownTimer > 0 ? $"<color=red>{cooldownTimer:F1}s</color>" : "<color=green>READY</color>";
         
-        statusText.text = $"MODE: {stateName}\n" +
-                          $"COOLDOWN: {cdStr}\n" +
-                          $"G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
+        statusText.text = $"対象:{stateName}\n" +
+                          $"発動:{cdStr}\n";
+        statusText2.text = $"重力:{settings.gravityScale:F1}\n速度:{settings.moveSpeed:F1}\n摩擦:{settings.friction:F1}";
+    }
+
+    // Sprite更新ロジック
+    private void UpdateSprite()
+    {
+        if (characterList == null || characterList.Length <= selectedCharacterIndex) return;
+
+        // 選択中のキャラクターデータ取得
+        CharacterSprites currentSet = characterList[selectedCharacterIndex];
+
+        // 向きの判定
+        if (moveInput.x > 0.1f) isFacingRight = true;
+        else if (moveInput.x < -0.1f) isFacingRight = false;
+
+        // 状態に応じたSprite選択
+        Sprite nextSprite;
+        if (isGrounded)
+        {
+            nextSprite = isFacingRight ? currentSet.groundRight : currentSet.groundLeft;
+        }
+        else
+        {
+            nextSprite = isFacingRight ? currentSet.airRight : currentSet.airLeft;
+        }
+
+        spriteRenderer.sprite = nextSprite;
     }
 
     private void OnCollisionStay2D(Collision2D collision) => isGrounded = true;

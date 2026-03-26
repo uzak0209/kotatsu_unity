@@ -1,57 +1,73 @@
 using UnityEngine;
 using System.Collections;
 using TMPro;
+using UnityEngine.UI;
 
 public class GameFlowManager : MonoBehaviour
 {
     [SerializeField] private PlayerController player; // インスペクターでプレイヤーをアサイン
-    [SerializeField] private TextMeshProUGUI countdownText; // カウントダウン用UI
-
-    [SerializeField] private int countdownSeconds = 3;
+    [SerializeField] private TextMeshProUGUI GText; // ゴール用UI
+    [SerializeField] private Image countdownImage; // それ以外
+    // カウントダウン用のスプライトとサウンド
+    [SerializeField] private Sprite sprite3;
+    [SerializeField] private Sprite sprite2;
+    [SerializeField] private Sprite sprite1;
+    [SerializeField] private Sprite spriteStart;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip countdownSE; 
+    [SerializeField] private AudioClip startSE;
+    [SerializeField] private AudioClip goalSE;
 
     void Start()
     {
         // ゲーム開始時は動けないように設定
         if (player != null) player.SetMoveAllowance(false);
+        countdownImage.gameObject.SetActive(false);
+        GText.text = "";
         // カウントダウン開始
         StartCoroutine(StartCountDown());
     }
 
     IEnumerator StartCountDown()
     {
-        float timer = countdownSeconds;
+        countdownImage.gameObject.SetActive(true);
 
-        while (timer > 0)
-        {
-            countdownText.text = timer.ToString("F0"); // 整数で表示
-            
-            // 演出：数字を少し大きくするなどのアニメーション（任意）
-            countdownText.transform.localScale = Vector3.one * 1.5f;
-            
-            yield return new WaitForSeconds(1f);
-            
-            timer--;
-        }
+        SetCountdownStep(sprite3, countdownSE);
+        yield return new WaitForSeconds(1f);
 
-        // 開始の合図
-        countdownText.text = "GO!";
+        SetCountdownStep(sprite2, countdownSE);
+        yield return new WaitForSeconds(1f);
+
+        SetCountdownStep(sprite1, countdownSE);
+        yield return new WaitForSeconds(1f);
+
+        SetCountdownStep(spriteStart, startSE);
         if (player != null) player.SetMoveAllowance(true);
 
-        // 1秒後に文字を消す
         yield return new WaitForSeconds(1f);
-        countdownText.text = "";
+        countdownImage.gameObject.SetActive(false);
     }
 
-    // ゴール時などに外部から呼ぶ用
+    private void SetCountdownStep(Sprite nextSprite, AudioClip clip)
+    {
+        countdownImage.sprite = nextSprite;
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+    }
+
+    // 外部参照
     public void OnPlayerGoal(string winnerName)
     {
-        // プレイヤーの操作を止める
         if (player != null) player.SetMoveAllowance(false);
+        if (audioSource != null && goalSE != null)
+        {
+            audioSource.PlayOneShot(goalSE);
+        }
 
-        // 結果を表示
-        countdownText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
-
-        // 2秒後にタイトルへ戻るコルーチンを開始
+        // ゴール表示
+        GText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
         StartCoroutine(ReturnToTitleRoutine());
     }
 
