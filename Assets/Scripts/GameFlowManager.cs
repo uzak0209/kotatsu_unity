@@ -1,67 +1,83 @@
 using UnityEngine;
 using System.Collections;
 using TMPro;
+using UnityEngine.UI;
 
 public class GameFlowManager : MonoBehaviour
 {
     [SerializeField] private PlayerController player; // インスペクターでプレイヤーをアサイン
-    [SerializeField] private TextMeshProUGUI countdownText; // カウントダウン用UI
-
-    [SerializeField] private int countdownSeconds = 3;
+    [SerializeField] private TextMeshProUGUI GText; // ゴール用UI
+    [SerializeField] private Image countdownImage; // それ以外
+    // カウントダウン用のスプライトとサウンド
+    [SerializeField] private Sprite sprite3;
+    [SerializeField] private Sprite sprite2;
+    [SerializeField] private Sprite sprite1;
+    [SerializeField] private Sprite spriteStart;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip countdownSE; 
+    [SerializeField] private AudioClip startSE;
+    [SerializeField] private AudioClip goalSE;
 
     void Start()
     {
         EnsureReferences();
         // ゲーム開始時は動けないように設定
         if (player != null) player.SetMoveAllowance(false);
+        countdownImage.gameObject.SetActive(false);
+        GText.text = "";
         // カウントダウン開始
         StartCoroutine(StartCountDown());
     }
 
     IEnumerator StartCountDown()
     {
-        if (countdownText == null)
+        if (countdownImage == null)
         {
             if (player != null) player.SetMoveAllowance(true);
             yield break;
         }
 
-        float timer = countdownSeconds;
+        countdownImage.gameObject.SetActive(true);
 
-        while (timer > 0)
-        {
-            countdownText.text = timer.ToString("F0"); // 整数で表示
-            
-            // 演出：数字を少し大きくするなどのアニメーション（任意）
-            countdownText.transform.localScale = Vector3.one * 1.5f;
-            
-            yield return new WaitForSeconds(1f);
-            
-            timer--;
-        }
+        SetCountdownStep(sprite3, countdownSE);
+        yield return new WaitForSeconds(1f);
 
-        // 開始の合図
-        countdownText.text = "GO!";
+        SetCountdownStep(sprite2, countdownSE);
+        yield return new WaitForSeconds(1f);
+
+        SetCountdownStep(sprite1, countdownSE);
+        yield return new WaitForSeconds(1f);
+
+        SetCountdownStep(spriteStart, startSE);
         if (player != null) player.SetMoveAllowance(true);
 
-        // 1秒後に文字を消す
         yield return new WaitForSeconds(1f);
-        countdownText.text = "";
+        countdownImage.gameObject.SetActive(false);
     }
 
-    // ゴール時などに外部から呼ぶ用
+    private void SetCountdownStep(Sprite nextSprite, AudioClip clip)
+    {
+        countdownImage.sprite = nextSprite;
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+    }
+
+    // 外部参照
     public void OnPlayerGoal(string winnerName)
     {
-        // プレイヤーの操作を止める
         if (player != null) player.SetMoveAllowance(false);
-
-        // 結果を表示
-        if (countdownText != null)
+        if (audioSource != null && goalSE != null)
         {
-            countdownText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
+            audioSource.PlayOneShot(goalSE);
         }
 
-        // 2秒後にタイトルへ戻るコルーチンを開始
+        // ゴール表示
+        if (GText != null)
+        {
+            GText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
+        }
         StartCoroutine(ReturnToTitleRoutine());
     }
 
@@ -81,41 +97,22 @@ public class GameFlowManager : MonoBehaviour
             player = FindAnyObjectByType<PlayerController>();
         }
 
-        if (countdownText == null)
+        if (GText == null)
         {
-            var countObject = GameObject.Find("count");
-            if (countObject != null)
+            var goalObject = GameObject.Find("G");
+            if (goalObject != null)
             {
-                countdownText = countObject.GetComponent<TextMeshProUGUI>();
+                GText = goalObject.GetComponent<TextMeshProUGUI>();
             }
         }
 
-        if (countdownText == null)
+        if (countdownImage == null)
         {
-            Canvas canvas = HudCanvasUtility.GetOrCreateHudCanvas();
-            var textGo = new GameObject("count");
-            textGo.transform.SetParent(canvas.transform, false);
-            countdownText = textGo.AddComponent<TextMeshProUGUI>();
+            var imageObject = GameObject.Find("count");
+            if (imageObject != null)
+            {
+                countdownImage = imageObject.GetComponent<Image>();
+            }
         }
-
-        ConfigureCountdownText(countdownText);
-    }
-
-    private static void ConfigureCountdownText(TextMeshProUGUI text)
-    {
-        if (text == null) return;
-
-        text.font = text.font != null ? text.font : TMP_Settings.defaultFontAsset;
-        text.fontSize = 62f;
-        text.alignment = TextAlignmentOptions.Center;
-        text.raycastTarget = false;
-        text.richText = true;
-
-        RectTransform rt = text.rectTransform;
-        rt.anchorMin = new Vector2(0.5f, 0.5f);
-        rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = Vector2.zero;
-        rt.sizeDelta = new Vector2(440f, 180f);
     }
 }
