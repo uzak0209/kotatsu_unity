@@ -24,7 +24,6 @@ public class PlayerRespawn : MonoBehaviour
         if (other.CompareTag("Checkpoint"))
         {
             lastCheckpointPos = other.transform.position;
-            Debug.Log("チェックポイント更新！");
         }
     }
 
@@ -32,6 +31,5 @@ public class PlayerRespawn : MonoBehaviour
     {
         transform.position = lastCheckpointPos;
         rb.linearVelocity = Vector2.zero; // 勢いをリセット
-        Debug.Log("リスポーンしました");
     }
 }
