@@ -12,11 +12,15 @@ public class scenechange : MonoBehaviour
     // ボタンのクリックイベントで呼び出すメソッド
     public void LoadNextScene()
     {
+        if (!isActiveAndEnabled) return;
+
         if(!isActive)
         {
             isActive = true;
-            audioSource.PlayOneShot(buttonSE);
-            Debug.Log(nextSceneName + "に遷移します");
+            if (audioSource != null && buttonSE != null)
+            {
+                audioSource.PlayOneShot(buttonSE);
+            }
             Initiate.Fade(nextSceneName, fadeColor, fadeDuration);
         }
     }

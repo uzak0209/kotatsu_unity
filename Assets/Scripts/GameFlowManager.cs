@@ -20,6 +20,7 @@ public class GameFlowManager : MonoBehaviour
 
     void Start()
     {
+        EnsureReferences();
         // ゲーム開始時は動けないように設定
         if (player != null) player.SetMoveAllowance(false);
         countdownImage.gameObject.SetActive(false);
@@ -30,6 +31,12 @@ public class GameFlowManager : MonoBehaviour
 
     IEnumerator StartCountDown()
     {
+        if (countdownImage == null)
+        {
+            if (player != null) player.SetMoveAllowance(true);
+            yield break;
+        }
+
         countdownImage.gameObject.SetActive(true);
 
         SetCountdownStep(sprite3, countdownSE);
@@ -67,7 +74,10 @@ public class GameFlowManager : MonoBehaviour
         }
 
         // ゴール表示
-        GText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
+        if (GText != null)
+        {
+            GText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
+        }
         StartCoroutine(ReturnToTitleRoutine());
     }
 
@@ -78,5 +88,31 @@ public class GameFlowManager : MonoBehaviour
 
         // "Title" という名前のシーンに遷移
         Initiate.Fade("Title", Color.black, 2f);
+    }
+
+    private void EnsureReferences()
+    {
+        if (player == null)
+        {
+            player = FindAnyObjectByType<PlayerController>();
+        }
+
+        if (GText == null)
+        {
+            var goalObject = GameObject.Find("G");
+            if (goalObject != null)
+            {
+                GText = goalObject.GetComponent<TextMeshProUGUI>();
+            }
+        }
+
+        if (countdownImage == null)
+        {
+            var imageObject = GameObject.Find("count");
+            if (imageObject != null)
+            {
+                countdownImage = imageObject.GetComponent<Image>();
+            }
+        }
     }
 }
