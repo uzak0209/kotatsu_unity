@@ -4,6 +4,22 @@ using TMPro;
 
 public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 {
+    // キャラクターごとのSpriteセットを定義
+    [System.Serializable]
+    public struct CharacterSprites
+    {
+        public string characterName;
+        public Sprite groundRight;
+        public Sprite groundLeft;
+        public Sprite airRight;
+        public Sprite airLeft;
+    }
+
+    [Header("Visual Settings")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private CharacterSprites[] characterList; // 4体分
+    public int selectedCharacterIndex = 0;
+
     // 操作対象のステート
     public enum ControlState { Gravity, Speed, Friction }
     [SerializeField] private MovementSettings settings;
@@ -16,6 +32,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private Vector2 moveInput;
     private bool isGrounded;
     private bool canMove = false; 
+    private bool isFacingRight = true;
     public void SetMoveAllowance(bool allowance) => canMove = allowance;
 
     // ステート管理用
@@ -26,6 +43,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
         controls = new PlayerControls();
         controls.Player.SetCallbacks(this);
         settings.gravityScale = 4f; // 初期値
@@ -46,6 +64,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         }
 
         UpdateUI();
+        UpdateSprite();
     }
 
     // 入力イベント
@@ -166,6 +185,32 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         statusText.text = $"対象:{stateName}\n" +
                           $"発動:{cdStr}\n";
         statusText2.text = $"重力:{settings.gravityScale:F1}\n速度:{settings.moveSpeed:F1}\n摩擦:{settings.friction:F1}";
+    }
+
+    // Sprite更新ロジック
+    private void UpdateSprite()
+    {
+        if (characterList == null || characterList.Length <= selectedCharacterIndex) return;
+
+        // 選択中のキャラクターデータ取得
+        CharacterSprites currentSet = characterList[selectedCharacterIndex];
+
+        // 向きの判定
+        if (moveInput.x > 0.1f) isFacingRight = true;
+        else if (moveInput.x < -0.1f) isFacingRight = false;
+
+        // 状態に応じたSprite選択
+        Sprite nextSprite;
+        if (isGrounded)
+        {
+            nextSprite = isFacingRight ? currentSet.groundRight : currentSet.groundLeft;
+        }
+        else
+        {
+            nextSprite = isFacingRight ? currentSet.airRight : currentSet.airLeft;
+        }
+
+        spriteRenderer.sprite = nextSprite;
     }
 
     private void OnCollisionStay2D(Collision2D collision) => isGrounded = true;
