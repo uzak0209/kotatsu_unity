@@ -6,7 +6,7 @@ namespace Kotatsu.Network
 {
     public class NetworkManager : MonoBehaviour
     {
-        private const string DefaultMatchmakingUrl = "http://192.168.0.24:8080";
+        private const string DefaultMatchmakingUrl = "http://kotatsu.ruxel.net:8080";
         private const string LegacyLocalMatchmakingUrl = "http://127.0.0.1:8080";
 
         [Header("Server Configuration")]

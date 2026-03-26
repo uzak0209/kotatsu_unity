@@ -11,8 +11,8 @@ namespace Kotatsu.EditorTools
 {
     public static class UdpConnectivityMcpCheck
     {
-        private const string MatchmakingBaseUrl = "http://192.168.0.24:8080";
-        private const string UdpHost = "192.168.0.24";
+        private const string MatchmakingBaseUrl = "http://kotatsu.ruxel.net:8080";
+        private const string UdpHost = "kotatsu.ruxel.net";
         private const int UdpPort = 4433;
         private const string DisplayName = "McpUdpProbe";
         private const string TokenFileName = "udp_connectivity_token.txt";
