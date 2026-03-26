@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: sample
   m_EditorClassIdentifier: Assembly-CSharp::MovementSettings
   moveSpeed: 8
-  jumpForce: 12
-  friction: 16
+  jumpForce: 16
+  friction: 8
   gravityScale: 4
