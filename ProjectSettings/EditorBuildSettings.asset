@@ -9,6 +9,12 @@ EditorBuildSettings:
     path: Assets/Scenes/Title.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
+    path: Assets/Scenes/LobbyCreate.unity
+    guid: ed9f38a11d38e45c8894ae0a958a3465
+  - enabled: 1
+    path: Assets/Scenes/LobbyJoin.unity
+    guid: db23f35e1a07d491c947a7807ec32ba4
+  - enabled: 1
     path: Assets/Scenes/Game.unity
     guid: af5848d3b62a33347a49058b94c9ac33
   - enabled: 1

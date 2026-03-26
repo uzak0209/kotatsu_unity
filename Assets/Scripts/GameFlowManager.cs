@@ -11,6 +11,7 @@ public class GameFlowManager : MonoBehaviour
 
     void Start()
     {
+        EnsureReferences();
         // ゲーム開始時は動けないように設定
         if (player != null) player.SetMoveAllowance(false);
         // カウントダウン開始
@@ -19,6 +20,12 @@ public class GameFlowManager : MonoBehaviour
 
     IEnumerator StartCountDown()
     {
+        if (countdownText == null)
+        {
+            if (player != null) player.SetMoveAllowance(true);
+            yield break;
+        }
+
         float timer = countdownSeconds;
 
         while (timer > 0)
@@ -49,7 +56,10 @@ public class GameFlowManager : MonoBehaviour
         if (player != null) player.SetMoveAllowance(false);
 
         // 結果を表示
-        countdownText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
+        if (countdownText != null)
+        {
+            countdownText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
+        }
 
         // 2秒後にタイトルへ戻るコルーチンを開始
         StartCoroutine(ReturnToTitleRoutine());
@@ -62,5 +72,50 @@ public class GameFlowManager : MonoBehaviour
 
         // "Title" という名前のシーンに遷移
         Initiate.Fade("Title", Color.black, 2f);
+    }
+
+    private void EnsureReferences()
+    {
+        if (player == null)
+        {
+            player = FindAnyObjectByType<PlayerController>();
+        }
+
+        if (countdownText == null)
+        {
+            var countObject = GameObject.Find("count");
+            if (countObject != null)
+            {
+                countdownText = countObject.GetComponent<TextMeshProUGUI>();
+            }
+        }
+
+        if (countdownText == null)
+        {
+            Canvas canvas = HudCanvasUtility.GetOrCreateHudCanvas();
+            var textGo = new GameObject("count");
+            textGo.transform.SetParent(canvas.transform, false);
+            countdownText = textGo.AddComponent<TextMeshProUGUI>();
+        }
+
+        ConfigureCountdownText(countdownText);
+    }
+
+    private static void ConfigureCountdownText(TextMeshProUGUI text)
+    {
+        if (text == null) return;
+
+        text.font = text.font != null ? text.font : TMP_Settings.defaultFontAsset;
+        text.fontSize = 62f;
+        text.alignment = TextAlignmentOptions.Center;
+        text.raycastTarget = false;
+        text.richText = true;
+
+        RectTransform rt = text.rectTransform;
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta = new Vector2(440f, 180f);
     }
 }
