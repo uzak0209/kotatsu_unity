@@ -34,8 +34,11 @@ namespace Kotatsu.Network
             public string match_id;
             public string player_id;
             public string token;
+            public string udp_url;
             public string quic_url;
             public long token_expires_at_unix;
+
+            public string RealtimeUrl => !string.IsNullOrWhiteSpace(udp_url) ? udp_url : quic_url;
         }
 
         [Serializable]

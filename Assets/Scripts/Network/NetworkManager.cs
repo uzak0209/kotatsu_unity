@@ -86,7 +86,10 @@ namespace Kotatsu.Network
             gameClient.OnJoinOk += (msg) =>
             {
                 OnGameConnected?.Invoke();
-                OnPlayerParamsChanged?.Invoke(msg.player_id, msg.params_.gravity, msg.params_.friction, msg.params_.speed);
+                if (msg?.@params != null)
+                {
+                    OnPlayerParamsChanged?.Invoke(msg.player_id, msg.@params.gravity, msg.@params.friction, msg.@params.speed);
+                }
             };
 
             gameClient.OnMatchStarted += (msg) =>
@@ -102,7 +105,10 @@ namespace Kotatsu.Network
 
             gameClient.OnParamApplied += (msg) =>
             {
-                OnPlayerParamsChanged?.Invoke(msg.from_player_id, msg.params_.gravity, msg.params_.friction, msg.params_.speed);
+                if (msg?.@params != null)
+                {
+                    OnPlayerParamsChanged?.Invoke(msg.from_player_id, msg.@params.gravity, msg.@params.friction, msg.@params.speed);
+                }
             };
 
             gameClient.OnPositionUpdate += (msg) =>
@@ -156,8 +162,17 @@ namespace Kotatsu.Network
                     currentPlayerId = response.player_id;
                     currentToken = response.token;
 
-                    // Parse realtime URL (format: "quic://host:port" or just "host:port")
-                    ParseRealtimeUrl(response.quic_url);
+                    if (string.IsNullOrWhiteSpace(response.RealtimeUrl))
+                    {
+                        string errorMessage = "Join match response did not include a realtime server URL.";
+                        Debug.LogError(errorMessage);
+                        OnNetworkError?.Invoke(errorMessage);
+                        onError?.Invoke(errorMessage);
+                        return;
+                    }
+
+                    // Parse realtime URL (format: "udp://host:port", legacy "quic://host:port", or just "host:port")
+                    ParseRealtimeUrl(response.RealtimeUrl);
 
                     OnMatchJoined?.Invoke(currentMatchId, currentPlayerId);
 
