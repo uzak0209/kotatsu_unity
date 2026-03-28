@@ -1199,14 +1199,10 @@ MonoBehaviour:
   startArea: {fileID: 6536185710592984564, guid: e9689fefd1ba68e40ab574e1a7e8e628, type: 3}
   goalArea: {fileID: 5854127083403647044, guid: 12268684a87bd784bbb74f17608b2465, type: 3}
   stageChunks:
+  - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
   - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
-  - {fileID: 6536185710592984564, guid: b5645a4189a5d5042ac3f4966987dd1e, type: 3}
-  - {fileID: 6536185710592984564, guid: c10d862408a477d42bc6c92c2eb11cf3, type: 3}
-  - {fileID: 6536185710592984564, guid: 9cca65dcb94475d42aa4f06e5e7a7737, type: 3}
-  - {fileID: 6536185710592984564, guid: fc1b056441fb46240ae608698d527bc0, type: 3}
-  - {fileID: 6536185710592984564, guid: a10f367e6d264b24fb97cee516dab852, type: 3}
-  - {fileID: 6536185710592984564, guid: aef069e084ce9df4eaab982ab769568f, type: 3}
-  chunkCount: 5
+  - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
+  chunkCount: 3
   chunkWidth: 19.2
 --- !u!114 &1101257597
 MonoBehaviour:
@@ -1522,8 +1518,8 @@ Transform:
   m_GameObject: {fileID: 1415478032}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4, y: -2.7, z: 0}
-  m_LocalScale: {x: 0.9, y: 0.9, z: 1}
+  m_LocalPosition: {x: -2.2, y: -2.8, z: 0}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}

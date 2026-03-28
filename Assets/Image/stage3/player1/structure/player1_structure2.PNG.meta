@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 185c52d83a6836c4392660fac9754de1
+guid: 1c77b3230176abe4180957394fcecc98
 TextureImporter:
   internalIDToNameTable:
   - first:
       213: -3093411977973533921
     second: player1_structure2_0
-  - first:
-      213: 16946769880479722
-    second: player1_structure2_1
-  - first:
-      213: -8821674412349805296
-    second: player1_structure2_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,10 +103,10 @@ TextureImporter:
       name: player1_structure2_0
       rect:
         serializedVersion: 2
-        x: 423
-        y: 466
-        width: 213
-        height: 42
+        x: 0
+        y: 0
+        width: 1920
+        height: 766
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -123,50 +117,6 @@ TextureImporter:
       bones: []
       spriteID: f13f2f4123ef115d0800000000000000
       internalID: -3093411977973533921
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: player1_structure2_1
-      rect:
-        serializedVersion: 2
-        x: 693
-        y: 466
-        width: 213
-        height: 42
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ae7f0d65ff43c3000800000000000000
-      internalID: 16946769880479722
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: player1_structure2_2
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1920
-        height: 393
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 01dacb77cdd139580800000000000000
-      internalID: -8821674412349805296
       vertices: []
       indices: 
       edges: []
@@ -186,8 +136,6 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       player1_structure2_0: -3093411977973533921
-      player1_structure2_1: 16946769880479722
-      player1_structure2_2: -8821674412349805296
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,25 +1,25 @@
 fileFormatVersion: 2
-guid: c73a5d1b9fded0f4fbd3d284bc4aff69
+guid: b850bb9acdfb864489e06d1cb1cabf7c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -396575303532607313
-    second: player1_ashiba_0
+      213: -7875676242633548170
+    second: player2_enemy1_0
   - first:
-      213: 5356579425289917495
-    second: player1_ashiba_1
+      213: -3512586094487573146
+    second: player2_enemy1_1
   - first:
-      213: 3591894569094315773
-    second: player1_ashiba_2
+      213: 5282402194591333819
+    second: player2_enemy1_2
   - first:
-      213: 3477204726186198156
-    second: player1_ashiba_3
+      213: -7207256209471963047
+    second: player2_enemy1_3
   - first:
-      213: -2865746744875992531
-    second: player1_ashiba_4
+      213: 4964994222776905212
+    second: player2_enemy1_4
   - first:
-      213: 3827674502413704330
-    second: player1_ashiba_5
+      213: 2895826041910352148
+    second: player2_enemy1_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -61,7 +61,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: player1_ashiba_0
+      name: player2_enemy1_0
       rect:
         serializedVersion: 2
-        x: 423
-        y: 466
-        width: 213
-        height: 42
+        x: 1165
+        y: 562
+        width: 130
+        height: 131
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,20 +130,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fa80f32dcd41f7af0800000000000000
-      internalID: -396575303532607313
+      spriteID: 67e18d73f2af3b290800000000000000
+      internalID: -7875676242633548170
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player1_ashiba_1
+      name: player2_enemy1_1
       rect:
         serializedVersion: 2
-        x: 693
-        y: 466
-        width: 213
-        height: 42
+        x: 1377
+        y: 557
+        width: 131
+        height: 117
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -152,20 +152,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 734529f5b94665a40800000000000000
-      internalID: 5356579425289917495
+      spriteID: 66d671bbe89c04fc0800000000000000
+      internalID: -3512586094487573146
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player1_ashiba_2
+      name: player2_enemy1_2
       rect:
         serializedVersion: 2
-        x: 277
-        y: 265
-        width: 213
-        height: 42
+        x: 543
+        y: 267
+        width: 91
+        height: 91
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -174,20 +174,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: dfe75857419f8d130800000000000000
-      internalID: 3591894569094315773
+      spriteID: bbd3c510fccde4940800000000000000
+      internalID: 5282402194591333819
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player1_ashiba_3
+      name: player2_enemy1_3
       rect:
         serializedVersion: 2
-        x: 547
-        y: 265
-        width: 213
-        height: 42
+        x: 1494
+        y: 331
+        width: 55
+        height: 55
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -196,20 +196,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c8443a38643814030800000000000000
-      internalID: 3477204726186198156
+      spriteID: 9500235c9aeaafb90800000000000000
+      internalID: -7207256209471963047
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player1_ashiba_4
+      name: player2_enemy1_4
       rect:
         serializedVersion: 2
-        x: 814
-        y: 265
-        width: 213
-        height: 42
+        x: 1562
+        y: 331
+        width: 55
+        height: 55
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -218,20 +218,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d2a3f67d482da38d0800000000000000
-      internalID: -2865746744875992531
+      spriteID: cfdeb70a0f337e440800000000000000
+      internalID: 4964994222776905212
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: player1_ashiba_5
+      name: player2_enemy1_5
       rect:
         serializedVersion: 2
-        x: 1518
-        y: 193
-        width: 162
-        height: 194
+        x: 1630
+        y: 332
+        width: 55
+        height: 55
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -240,8 +240,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a8c50381ea1ae1530800000000000000
-      internalID: 3827674502413704330
+      spriteID: 419546f317a003820800000000000000
+      internalID: 2895826041910352148
       vertices: []
       indices: 
       edges: []
@@ -250,7 +250,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -260,12 +260,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      player1_ashiba_0: -396575303532607313
-      player1_ashiba_1: 5356579425289917495
-      player1_ashiba_2: 3591894569094315773
-      player1_ashiba_3: 3477204726186198156
-      player1_ashiba_4: -2865746744875992531
-      player1_ashiba_5: 3827674502413704330
+      player2_enemy1_0: -7875676242633548170
+      player2_enemy1_1: -3512586094487573146
+      player2_enemy1_2: 5282402194591333819
+      player2_enemy1_3: -7207256209471963047
+      player2_enemy1_4: 4964994222776905212
+      player2_enemy1_5: 2895826041910352148
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
