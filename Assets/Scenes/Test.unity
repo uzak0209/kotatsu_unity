@@ -1199,7 +1199,7 @@ MonoBehaviour:
   startArea: {fileID: 6536185710592984564, guid: e9689fefd1ba68e40ab574e1a7e8e628, type: 3}
   goalArea: {fileID: 5854127083403647044, guid: 12268684a87bd784bbb74f17608b2465, type: 3}
   stageChunks:
-  - {fileID: 6536185710592984564, guid: 40c9b60aca4fe4e47a17741998143ac1, type: 3}
+  - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
   - {fileID: 6536185710592984564, guid: b5645a4189a5d5042ac3f4966987dd1e, type: 3}
   - {fileID: 6536185710592984564, guid: c10d862408a477d42bc6c92c2eb11cf3, type: 3}
   - {fileID: 6536185710592984564, guid: 9cca65dcb94475d42aa4f06e5e7a7737, type: 3}
@@ -1207,7 +1207,7 @@ MonoBehaviour:
   - {fileID: 6536185710592984564, guid: a10f367e6d264b24fb97cee516dab852, type: 3}
   - {fileID: 6536185710592984564, guid: aef069e084ce9df4eaab982ab769568f, type: 3}
   chunkCount: 5
-  chunkWidth: 19
+  chunkWidth: 19.2
 --- !u!114 &1101257597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1223,10 +1223,10 @@ MonoBehaviour:
   player: {fileID: 1415478037}
   GText: {fileID: 449692811}
   countdownImage: {fileID: 197133526}
-  sprite3: {fileID: -6470460504253458178, guid: 7072ec054480f9f48b2f6c46d44953ce, type: 3}
-  sprite2: {fileID: 6937817954938267909, guid: ecdfcd7afb2b8c648989b8a1efe6404b, type: 3}
-  sprite1: {fileID: -855298285791758126, guid: cb89ad40f1e6f4d4eb373c5bf59c3479, type: 3}
-  spriteStart: {fileID: 3980168229369012863, guid: 31a56bde1f380df47bbb918baa497c52, type: 3}
+  sprite3: {fileID: 6124996449811485693, guid: aaf1314898e356f45822deef280f4450, type: 3}
+  sprite2: {fileID: -8949919681350026440, guid: a105c6421bc59c14f98014ba32144e55, type: 3}
+  sprite1: {fileID: -2324262115499692324, guid: a5843d1193d2be148900e86d0ff8582b, type: 3}
+  spriteStart: {fileID: -9048257262288958109, guid: 080928e21ba8b1b4e89dd71cc57d104a, type: 3}
   audioSource: {fileID: 1357989083}
   countdownSE: {fileID: 8300000, guid: 437e35191bc4dde4688937ba2edcc9f9, type: 3}
   startSE: {fileID: 8300000, guid: 33805dd2676bb6540b5445f763405bb5, type: 3}
@@ -1565,6 +1565,8 @@ MonoBehaviour:
   selectedCharacterIndex: 0
   settings: {fileID: 11400000, guid: e2306ee42ecc251419c3b0a2ba507107, type: 2}
   statusText: {fileID: 204270733}
+  networkManager: {fileID: 0}
+  networkPositionSendInterval: 0.05
   statusText2: {fileID: 273274699}
   logText: {fileID: 954018290}
 --- !u!114 &1415478038
@@ -1579,6 +1581,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 999fb46fb8b4be14d82b754b16e5cf19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerRespawn
+  player: {fileID: 1415478037}
 --- !u!1 &1536646612
 GameObject:
   m_ObjectHideFlags: 0
