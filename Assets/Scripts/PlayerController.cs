@@ -41,8 +41,8 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
     // ステート管理用
     private ControlState currentState = ControlState.Gravity;
-    private float cooldownTimer = 13f; // 開始時も10秒クールタイム
-    private const float MaxCooldown = 10f;
+    private float cooldownTimer = 11f; // 開始時も10秒クールタイム
+    private const float MaxCooldown = 8f;
 
     void Awake()
     {

@@ -1,9 +1,11 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerRespawn : MonoBehaviour
 {
     private Vector3 lastCheckpointPos;
     private Rigidbody2D rb;
+    [SerializeField] private PlayerController player;
 
     void Awake()
     {
@@ -24,6 +26,7 @@ public class PlayerRespawn : MonoBehaviour
         if (other.CompareTag("Checkpoint"))
         {
             lastCheckpointPos = other.transform.position;
+            Debug.Log("Checkpoint reached: " + lastCheckpointPos);
         }
     }
 
@@ -31,5 +34,14 @@ public class PlayerRespawn : MonoBehaviour
     {
         transform.position = lastCheckpointPos;
         rb.linearVelocity = Vector2.zero; // 勢いをリセット
+        Debug.Log("Player respawned at: " + lastCheckpointPos);
+        StartCoroutine(Deathpenalty()); // 死亡ペナルティを適用
+    }
+
+    IEnumerator Deathpenalty()
+    {
+        player.SetMoveAllowance(false);
+        yield return new WaitForSeconds(2f);
+        player.SetMoveAllowance(true);
     }
 }
