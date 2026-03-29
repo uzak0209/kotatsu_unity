@@ -1196,12 +1196,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d05a7be80b682b54b81a60735ea72656, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageManager
-  startArea: {fileID: 6536185710592984564, guid: e9689fefd1ba68e40ab574e1a7e8e628, type: 3}
-  goalArea: {fileID: 5854127083403647044, guid: 12268684a87bd784bbb74f17608b2465, type: 3}
-  stageChunks:
-  - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
-  - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
-  - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
+  characterStages:
+  - characterName: player1
+    startArea: {fileID: 6536185710592984564, guid: e9689fefd1ba68e40ab574e1a7e8e628, type: 3}
+    goalArea: {fileID: 5854127083403647044, guid: 12268684a87bd784bbb74f17608b2465, type: 3}
+    stageChunks:
+    - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
+    - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
+    - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
+  selectedCharacterIndex: 0
   chunkCount: 3
   chunkWidth: 19.2
 --- !u!114 &1101257597
@@ -1219,10 +1222,28 @@ MonoBehaviour:
   player: {fileID: 1415478037}
   GText: {fileID: 449692811}
   countdownImage: {fileID: 197133526}
-  sprite3: {fileID: 6124996449811485693, guid: aaf1314898e356f45822deef280f4450, type: 3}
-  sprite2: {fileID: -8949919681350026440, guid: a105c6421bc59c14f98014ba32144e55, type: 3}
-  sprite1: {fileID: -2324262115499692324, guid: a5843d1193d2be148900e86d0ff8582b, type: 3}
-  spriteStart: {fileID: -9048257262288958109, guid: 080928e21ba8b1b4e89dd71cc57d104a, type: 3}
+  characterCountdownSprites:
+  - characterName: 1
+    sprite3: {fileID: 6124996449811485693, guid: aaf1314898e356f45822deef280f4450, type: 3}
+    sprite2: {fileID: -8949919681350026440, guid: a105c6421bc59c14f98014ba32144e55, type: 3}
+    sprite1: {fileID: -2324262115499692324, guid: a5843d1193d2be148900e86d0ff8582b, type: 3}
+    spriteStart: {fileID: -9048257262288958109, guid: 080928e21ba8b1b4e89dd71cc57d104a, type: 3}
+  - characterName: 2
+    sprite3: {fileID: -1229117433064899240, guid: b05dbff3d1f46014db5da022316d2bb9, type: 3}
+    sprite2: {fileID: -4425815731214854300, guid: 3f0e236f1f246044989b9bce96032718, type: 3}
+    sprite1: {fileID: -5155689262965954225, guid: a8148e19987472d47bb9ffacf1227f08, type: 3}
+    spriteStart: {fileID: 3006422618506759175, guid: 07377cb58835f9147929e22fe5707a12, type: 3}
+  - characterName: 3
+    sprite3: {fileID: 1422071231144658789, guid: 80da02e1e10d18e4781294895fcbf8b5, type: 3}
+    sprite2: {fileID: 943885297463823558, guid: 76a9a86c9d163c4498df83a31862d890, type: 3}
+    sprite1: {fileID: 1848784522887692395, guid: f85a74955e0ca17468869a4d4b9d60f3, type: 3}
+    spriteStart: {fileID: -400358807010661752, guid: 65f1e76d710f49544b1a57cfc9fc1aea, type: 3}
+  - characterName: 4
+    sprite3: {fileID: 7289833769055154188, guid: ff6a0a84956bc044c84cfcc934afd61a, type: 3}
+    sprite2: {fileID: -5012875565831533185, guid: 4e39aca3e2303b34eaeeeecf54b84644, type: 3}
+    sprite1: {fileID: 5408507323681237346, guid: ff4e607b0c92baa468d44cafb125e60f, type: 3}
+    spriteStart: {fileID: -1450881227439338575, guid: 271d35855a34276428cd793a6980e15a, type: 3}
+  selectedCharacterIndex: 0
   audioSource: {fileID: 1357989083}
   countdownSE: {fileID: 8300000, guid: 437e35191bc4dde4688937ba2edcc9f9, type: 3}
   startSE: {fileID: 8300000, guid: 33805dd2676bb6540b5445f763405bb5, type: 3}
@@ -1559,12 +1580,14 @@ MonoBehaviour:
     airRight: {fileID: 21300000, guid: 1b6272035be08ab46bc1610a8e0d0d01, type: 3}
     airLeft: {fileID: 21300000, guid: fff7f886071a0e348a7f1b4e477051a4, type: 3}
   selectedCharacterIndex: 0
+  gravityLevel: 1
+  speedLevel: 1
+  frictionLevel: 1
   settings: {fileID: 11400000, guid: e2306ee42ecc251419c3b0a2ba507107, type: 2}
   statusText: {fileID: 204270733}
-  networkManager: {fileID: 0}
-  networkPositionSendInterval: 0.05
   statusText2: {fileID: 273274699}
   logText: {fileID: 954018290}
+  networkManager: {fileID: 0}
 --- !u!114 &1415478038
 MonoBehaviour:
   m_ObjectHideFlags: 0
