@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 289f1a256915f724bb6a7b3c91bb90cb, type: 3}
   m_Name: sample
   m_EditorClassIdentifier: Assembly-CSharp::MovementSettings
-  moveSpeed: 8
-  jumpForce: 16
-  friction: 8
+  moveSpeed: 1
+  jumpForce: 1
+  friction: 1
   gravityScale: 4
