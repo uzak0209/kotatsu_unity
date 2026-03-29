@@ -27,6 +27,7 @@ namespace Kotatsu.EditorTools
         private class JoinMatchResponse
         {
             public string token;
+            public string udp_url;
         }
 
         [MenuItem("Tools/Network/Run UDP Check")]

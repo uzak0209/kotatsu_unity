@@ -55,7 +55,7 @@ namespace Kotatsu.Network
         public string t = "join_ok";
         public string match_id;
         public string player_id;
-        public ParamValues params_;
+        public ParamValues @params;
         public long server_time_ms;
         string INetworkMessage.t => t;
 
@@ -86,7 +86,7 @@ namespace Kotatsu.Network
         public string t = "param_applied";
         public string from_player_id;
         public int seq;
-        public ParamValues params_;
+        public ParamValues @params;
         public long next_param_change_at_unix;
         public long server_time_ms;
         string INetworkMessage.t => t;
