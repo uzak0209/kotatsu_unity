@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
 using Kotatsu.Network;
+using System;
 
 public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 {
@@ -54,7 +55,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
     private ControlState currentState = ControlState.Gravity;
     private float cooldownTimer = 11f; 
-    private const float MaxCooldown = 8f;
+    public const float MaxCooldown = 8f;
     private float hangTimeVelocityThreshold = 2.0f; // 頂点と判定するY速度の閾値
     private float hangTimeGravityMultiplier = 0.5f; // 頂点付近での重力倍率（1より小さくするとふわっとする）
     private bool jumpRequest;
@@ -63,6 +64,12 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private PlayerRespawn playerRespawn;
     private bool isRespawning = false;
     private float respawnDownKeyTime = 1f; // リスポーンのためにFキーを押し続ける必要がある時間
+    [SerializeField]
+    GaugeController gaugeController;
+    [SerializeField]
+    private GameObject[] statusSelectors; // 0: Gravity, 1: Speed, 2: Friction
+    [SerializeField]
+    private TextMeshProUGUI[] statusValues; // 0: Gravity, 1: Speed, 2: Friction;
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -71,7 +78,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         controls.Player.SetCallbacks(this);
         jumpRequest = false;
         if (networkManager == null) networkManager = FindAnyObjectByType<NetworkManager>();
-
+        gaugeController.StartGauge(cooldownTimer);
         // 初期値の適用
         SyncSettingsWithLevels();
     }
@@ -178,7 +185,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
             case ControlState.Speed: speedLevel += diff; break;
             case ControlState.Friction: frictionLevel += diff; break;
         }
-
+        gaugeController.StartGauge(MaxCooldown);
         SyncSettingsWithLevels();
         
         string statName = currentState.ToString();
@@ -279,18 +286,35 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     // --- UI/Visual ---
     private void UpdateUI()
     {
-        if (statusText == null) return;
-        string stateName = currentState switch {
-            ControlState.Gravity => "重力",
-            ControlState.Speed => "速度",
-            ControlState.Friction => "摩擦",
-            _ => ""
+        // if (statusText == null) return;
+        GameObject selectedSelector = currentState switch {
+            ControlState.Gravity => statusSelectors[0],
+            ControlState.Speed => statusSelectors[1],
+            ControlState.Friction => statusSelectors[2],
+            _ => null
         };
-        string cdStr = cooldownTimer > 0 ? $"<color=red>{cooldownTimer:F1}s</color>" : "<color=green>READY</color>";
+        foreach (var selector in statusSelectors) selector.SetActive(selector == selectedSelector);
+        // string cdStr = cooldownTimer > 0 ? $"<color=red>{cooldownTimer:F1}s</color>" : "<color=green>READY</color>";
         
-        statusText.text = $"MODE: {stateName}\n" +
-                          $"COOLDOWN: {cdStr}\n" +
-                          $"G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
+        // statusText.text = $"MODE: {stateName}\n" +
+        // //                   $"COOLDOWN: {cdStr}\n" +
+        //                   $"G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
+        switch (gravityLevel)
+        {
+            case 0: statusValues[0].text = "低"; break;
+            case 1: statusValues[0].text = "中"; break;
+            case 2: statusValues[0].text = "高"; break;
+        }       switch (speedLevel)
+        {
+            case 0: statusValues[1].text = "低"; break;
+            case 1: statusValues[1].text = "中"; break;
+            case 2: statusValues[1].text = "高"; break;
+        }        switch (frictionLevel)
+        {
+            case 0: statusValues[2].text = "低"; break;
+            case 1: statusValues[2].text = "中"; break;
+            case 2: statusValues[2].text = "高"; break;
+        }
     }
 
     private void UpdateSprite()
