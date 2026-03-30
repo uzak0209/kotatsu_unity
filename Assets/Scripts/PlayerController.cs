@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 using TMPro;
 using Kotatsu.Network;
 using System;
+using UnityEngine.UI;
+using Unity.VisualScripting;
 
 public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 {
@@ -70,6 +72,16 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private GameObject[] statusSelectors; // 0: Gravity, 1: Speed, 2: Friction
     [SerializeField]
     private TextMeshProUGUI[] statusValues; // 0: Gravity, 1: Speed, 2: Friction;
+    [SerializeField]
+    private Image characterIconImage; // キャラアイコン表示用のSpriteRenderer
+    [SerializeField]
+    private Sprite[] characterIconList; // キャラアイコン用のスプライトセット
+    [SerializeField]
+    private Image statusIconImage; // ステータスアイコン表示用のImage
+    [SerializeField]
+    private Sprite[] statusIconList; // ステータスアイコン用のスプライトセット
+    [SerializeField]
+    private TextMeshProUGUI statusLevelText; // キャラ名表示用のTextMeshProUGUI
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -188,14 +200,24 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         gaugeController.StartGauge(MaxCooldown);
         SyncSettingsWithLevels();
         
-        string statName = currentState.ToString();
-        float newVal = currentState switch {
-            ControlState.Gravity => settings.gravityScale,
-            ControlState.Speed => settings.moveSpeed,
-            _ => settings.friction
-        };
+        switch (currentState)
+        {
+            case ControlState.Gravity: statusIconImage.sprite = statusIconList[0];
+            statusLevelText.text = gravityLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+            case ControlState.Speed: statusIconImage.sprite = statusIconList[1];
+            statusLevelText.text = speedLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+            case ControlState.Friction: statusIconImage.sprite = statusIconList[2];
+            statusLevelText.text = frictionLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+        }
+        characterIconImage.sprite = characterIconList[selectedCharacterIndex]; //本来はselectedCharacterIndexではなく変えた人。
+        // string statName = currentState.ToString();
+        // float newVal = currentState switch {
+        //     ControlState.Gravity => settings.gravityScale,
+        //     ControlState.Speed => settings.moveSpeed,
+        //     _ => settings.friction
+        // };
 
-        if (logText != null) logText.text = $"あなたが{statName}変更:{newVal:F1}";
+        // if (logText != null) logText.text = $"あなたが{statName}変更:{newVal:F1}";
         
         cooldownTimer = MaxCooldown;
         return true;
