@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
 
@@ -22,6 +23,10 @@ namespace Kotatsu.Network
         private string currentToken;
         private string realtimeHost;
         private int realtimePort;
+        private MatchStartedMessage currentMatchStartMessage;
+        private MatchPlayerState[] currentMatchPlayers = Array.Empty<MatchPlayerState>();
+        private readonly Dictionary<string, MatchPlayerState> playerStateById = new Dictionary<string, MatchPlayerState>();
+        private readonly Dictionary<string, int> playerStageIndexById = new Dictionary<string, int>();
 
         // Events
         public event Action<string> OnMatchCreated;
@@ -29,13 +34,17 @@ namespace Kotatsu.Network
         public event Action OnGameConnected;
         public event Action OnGameDisconnected;
         public event Action<string, long> OnMatchStarted;
+        public event Action OnMatchConfigurationUpdated;
         public event Action<string, int, int, int> OnPlayerParamsChanged; // playerId, gravity, friction, speed
         public event Action<string, float, float, float, float> OnPlayerPositionUpdated; // playerId, x, y, vx, vy
+        public event Action<string, int> OnPlayerStageProgressUpdated; // playerId, currentStageIndex
         public event Action<string> OnNetworkError;
 
         public bool IsConnected => gameClient != null && gameClient.IsConnected;
         public string CurrentMatchId => currentMatchId;
         public string CurrentPlayerId => currentPlayerId;
+        public bool HasMatchConfiguration => currentMatchPlayers != null && currentMatchPlayers.Length > 0;
+        public MatchPlayerState[] CurrentMatchPlayers => currentMatchPlayers;
 
         private void Awake()
         {
@@ -80,6 +89,7 @@ namespace Kotatsu.Network
 
             gameClient.OnDisconnected += () =>
             {
+                ClearMatchConfiguration();
                 OnGameDisconnected?.Invoke();
             };
 
@@ -100,6 +110,7 @@ namespace Kotatsu.Network
                 }
 
                 currentMatchId = msg.match_id;
+                ApplyMatchConfiguration(msg);
                 OnMatchStarted?.Invoke(msg.match_id, msg.started_at_unix);
             };
 
@@ -114,6 +125,16 @@ namespace Kotatsu.Network
             gameClient.OnPositionUpdate += (msg) =>
             {
                 OnPlayerPositionUpdated?.Invoke(msg.player_id, msg.x, msg.y, msg.vx, msg.vy);
+            };
+
+            gameClient.OnStageProgressUpdate += (msg) =>
+            {
+                if (msg == null || string.IsNullOrWhiteSpace(msg.player_id))
+                {
+                    return;
+                }
+
+                UpdatePlayerStageProgressInternal(msg.player_id, msg.current_stage_index, true);
             };
 
             gameClient.OnError += (msg) =>
@@ -264,12 +285,6 @@ namespace Kotatsu.Network
                 matchId.Trim(),
                 response =>
                 {
-                    if (response != null && !string.IsNullOrWhiteSpace(response.match_id))
-                    {
-                        currentMatchId = response.match_id;
-                        OnMatchStarted?.Invoke(response.match_id, response.started_at_unix);
-                    }
-
                     onSuccess?.Invoke(response);
                 },
                 error =>
@@ -313,6 +328,16 @@ namespace Kotatsu.Network
             gameClient.SendPosition(x, y, vx, vy);
         }
 
+        public void UpdateStageProgress(int currentStageIndex)
+        {
+            if (!IsConnected)
+            {
+                return;
+            }
+
+            gameClient.SendStageProgress(currentStageIndex);
+        }
+
         // Disconnect from current game
         public void Disconnect()
         {
@@ -320,11 +345,101 @@ namespace Kotatsu.Network
             currentMatchId = null;
             currentPlayerId = null;
             currentToken = null;
+            ClearMatchConfiguration();
         }
 
         #endregion
 
         #region Private Methods
+
+        private void ApplyMatchConfiguration(MatchStartedMessage msg)
+        {
+            currentMatchStartMessage = msg;
+            currentMatchPlayers = msg != null && msg.players != null ? msg.players : Array.Empty<MatchPlayerState>();
+
+            playerStateById.Clear();
+            playerStageIndexById.Clear();
+
+            for (int i = 0; i < currentMatchPlayers.Length; i++)
+            {
+                MatchPlayerState state = currentMatchPlayers[i];
+                if (state == null || string.IsNullOrWhiteSpace(state.player_id))
+                {
+                    continue;
+                }
+
+                playerStateById[state.player_id] = state;
+                playerStageIndexById[state.player_id] = state.current_stage_index;
+            }
+
+            OnMatchConfigurationUpdated?.Invoke();
+        }
+
+        private void ClearMatchConfiguration()
+        {
+            currentMatchStartMessage = null;
+            currentMatchPlayers = Array.Empty<MatchPlayerState>();
+            playerStateById.Clear();
+            playerStageIndexById.Clear();
+            OnMatchConfigurationUpdated?.Invoke();
+        }
+
+        private void UpdatePlayerStageProgressInternal(string playerId, int currentStageIndex, bool notify)
+        {
+            if (string.IsNullOrWhiteSpace(playerId))
+            {
+                return;
+            }
+
+            playerStageIndexById[playerId] = currentStageIndex;
+
+            if (playerStateById.TryGetValue(playerId, out MatchPlayerState playerState) && playerState != null)
+            {
+                playerState.current_stage_index = currentStageIndex;
+            }
+
+            if (notify)
+            {
+                OnPlayerStageProgressUpdated?.Invoke(playerId, currentStageIndex);
+            }
+        }
+
+        public bool TryGetPlayerMatchState(string playerId, out MatchPlayerState playerState)
+        {
+            if (!string.IsNullOrWhiteSpace(playerId) && playerStateById.TryGetValue(playerId, out playerState))
+            {
+                return playerState != null;
+            }
+
+            playerState = null;
+            return false;
+        }
+
+        public int GetAssignedColorIndex(string playerId, int fallback = 0)
+        {
+            return TryGetPlayerMatchState(playerId, out MatchPlayerState playerState)
+                ? playerState.color_index
+                : fallback;
+        }
+
+        public int[] GetAssignedStageOrder(string playerId)
+        {
+            if (TryGetPlayerMatchState(playerId, out MatchPlayerState playerState) && playerState.stage_order != null)
+            {
+                int[] copy = new int[playerState.stage_order.Length];
+                Array.Copy(playerState.stage_order, copy, copy.Length);
+                return copy;
+            }
+
+            return Array.Empty<int>();
+        }
+
+        public int GetPlayerCurrentStageIndex(string playerId, int fallback = 0)
+        {
+            return !string.IsNullOrWhiteSpace(playerId) && playerStageIndexById.TryGetValue(playerId, out int currentStageIndex)
+                ? currentStageIndex
+                : fallback;
+        }
 
         private void ParseRealtimeUrl(string url)
         {

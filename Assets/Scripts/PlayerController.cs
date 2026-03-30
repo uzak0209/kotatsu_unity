@@ -44,8 +44,12 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private bool isGrounded;
     private bool canMove = false; 
     private float nextNetworkSendTime;
+    private float nextNetworkStageSendTime;
     private bool isFacingRight = true;
     private float networkPositionSendInterval = 0.05f;
+    private float networkStageSendInterval = 0.2f;
+    private int lastSentStageIndex = -1;
+    private bool appliedAssignedCharacter;
 
     public void SetMoveAllowance(bool allowance) => canMove = allowance;
 
@@ -66,6 +70,11 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         SyncSettingsWithLevels();
     }
 
+    void Start()
+    {
+        ApplyAssignedCharacterIfAvailable();
+    }
+
     void OnEnable() => controls?.Enable();
     void OnDisable() => controls?.Disable();
 
@@ -77,8 +86,10 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
             if (cooldownTimer < 0) cooldownTimer = 0;
         }
 
+        ApplyAssignedCharacterIfAvailable();
         HandleDesktopParamShortcuts();
         TrySendPositionUpdate();
+        TrySendStageProgressUpdate();
         UpdateUI();
         UpdateSprite();
     }
@@ -218,6 +229,35 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         Vector2 pos = transform.position;
         Vector2 vel = rb.linearVelocity;
         networkManager.UpdatePosition(pos.x, pos.y, vel.x, vel.y);
+    }
+
+    private void TrySendStageProgressUpdate()
+    {
+        if (networkManager == null || !networkManager.IsConnected) return;
+
+        StageManager stageManager = StageManager.Instance != null ? StageManager.Instance : FindFirstObjectByType<StageManager>();
+        if (stageManager == null) return;
+
+        int currentStageIndex = stageManager.GetCurrentStageIndexForPosition(transform.position.x);
+        bool stageChanged = currentStageIndex != lastSentStageIndex;
+        if (!stageChanged && Time.unscaledTime < nextNetworkStageSendTime) return;
+
+        lastSentStageIndex = currentStageIndex;
+        nextNetworkStageSendTime = Time.unscaledTime + networkStageSendInterval;
+        networkManager.UpdateStageProgress(currentStageIndex);
+    }
+
+    private void ApplyAssignedCharacterIfAvailable()
+    {
+        if (appliedAssignedCharacter || networkManager == null) return;
+
+        if (!networkManager.TryGetPlayerMatchState(networkManager.CurrentPlayerId, out MatchPlayerState playerState))
+        {
+            return;
+        }
+
+        selectedCharacterIndex = Mathf.Clamp(playerState.color_index, 0, Mathf.Max(0, characterList.Length - 1));
+        appliedAssignedCharacter = true;
     }
 
     // --- UI/Visual ---
