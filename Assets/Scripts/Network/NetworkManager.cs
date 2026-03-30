@@ -25,6 +25,10 @@ namespace Kotatsu.Network
         private int realtimePort;
         private MatchStartedMessage currentMatchStartMessage;
         private MatchPlayerState[] currentMatchPlayers = Array.Empty<MatchPlayerState>();
+        private bool hasLatestParams;
+        private int latestGravity = 2;
+        private int latestFriction = 2;
+        private int latestSpeed = 2;
         private readonly Dictionary<string, MatchPlayerState> playerStateById = new Dictionary<string, MatchPlayerState>();
         private readonly Dictionary<string, int> playerStageIndexById = new Dictionary<string, int>();
 
@@ -89,6 +93,7 @@ namespace Kotatsu.Network
 
             gameClient.OnDisconnected += () =>
             {
+                ClearLatestParams();
                 ClearMatchConfiguration();
                 OnGameDisconnected?.Invoke();
             };
@@ -98,6 +103,7 @@ namespace Kotatsu.Network
                 OnGameConnected?.Invoke();
                 if (msg?.@params != null)
                 {
+                    UpdateLatestParams(msg.@params.gravity, msg.@params.friction, msg.@params.speed);
                     OnPlayerParamsChanged?.Invoke(msg.player_id, msg.@params.gravity, msg.@params.friction, msg.@params.speed);
                 }
             };
@@ -118,6 +124,7 @@ namespace Kotatsu.Network
             {
                 if (msg?.@params != null)
                 {
+                    UpdateLatestParams(msg.@params.gravity, msg.@params.friction, msg.@params.speed);
                     OnPlayerParamsChanged?.Invoke(msg.from_player_id, msg.@params.gravity, msg.@params.friction, msg.@params.speed);
                 }
             };
@@ -345,6 +352,7 @@ namespace Kotatsu.Network
             currentMatchId = null;
             currentPlayerId = null;
             currentToken = null;
+            ClearLatestParams();
             ClearMatchConfiguration();
         }
 
@@ -415,6 +423,14 @@ namespace Kotatsu.Network
             return false;
         }
 
+        public bool TryGetLatestParams(out int gravity, out int friction, out int speed)
+        {
+            gravity = latestGravity;
+            friction = latestFriction;
+            speed = latestSpeed;
+            return hasLatestParams;
+        }
+
         public int GetAssignedColorIndex(string playerId, int fallback = 0)
         {
             return TryGetPlayerMatchState(playerId, out MatchPlayerState playerState)
@@ -439,6 +455,22 @@ namespace Kotatsu.Network
             return !string.IsNullOrWhiteSpace(playerId) && playerStageIndexById.TryGetValue(playerId, out int currentStageIndex)
                 ? currentStageIndex
                 : fallback;
+        }
+
+        private void UpdateLatestParams(int gravity, int friction, int speed)
+        {
+            latestGravity = gravity;
+            latestFriction = friction;
+            latestSpeed = speed;
+            hasLatestParams = true;
+        }
+
+        private void ClearLatestParams()
+        {
+            hasLatestParams = false;
+            latestGravity = 2;
+            latestFriction = 2;
+            latestSpeed = 2;
         }
 
         private void ParseRealtimeUrl(string url)
