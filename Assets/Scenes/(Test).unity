@@ -1199,13 +1199,15 @@ MonoBehaviour:
   characterStages:
   - characterName: player1
     startArea: {fileID: 6536185710592984564, guid: e9689fefd1ba68e40ab574e1a7e8e628, type: 3}
-    goalArea: {fileID: 5854127083403647044, guid: 12268684a87bd784bbb74f17608b2465, type: 3}
+    goalArea: {fileID: 6536185710592984564, guid: a1ee6fab7984ad74d8c498091dd7092d, type: 3}
     stageChunks:
     - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
     - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
     - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
+    - {fileID: 6536185710592984564, guid: ea3694427c3928443ac90b122843a7e7, type: 3}
+    - {fileID: 6536185710592984564, guid: ea3694427c3928443ac90b122843a7e7, type: 3}
   selectedCharacterIndex: 0
-  chunkCount: 3
+  chunkCount: 4
   chunkWidth: 19.2
 --- !u!114 &1101257597
 MonoBehaviour:
