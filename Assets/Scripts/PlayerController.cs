@@ -59,7 +59,10 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private float hangTimeGravityMultiplier = 0.5f; // 頂点付近での重力倍率（1より小さくするとふわっとする）
     private bool jumpRequest;
     private bool isJumpKeyHeld;
-
+    [SerializeField] 
+    private PlayerRespawn playerRespawn;
+    private bool isRespawning = false;
+    private float respawnDownKeyTime = 1f; // リスポーンのためにFキーを押し続ける必要がある時間
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -83,8 +86,17 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
             cooldownTimer -= Time.deltaTime;
             if (cooldownTimer < 0) cooldownTimer = 0;
         }
-
-        HandleDesktopParamShortcuts();
+        if (isRespawning)
+        {
+            respawnDownKeyTime -= Time.deltaTime;
+            if (respawnDownKeyTime <= 0) 
+            {
+                playerRespawn.Respawn();
+                respawnDownKeyTime = 1f; // タイマーをリセット
+                isRespawning = false;
+            }
+        }
+        // HandleDesktopParamShortcuts();　多分もう使わない。
         TrySendPositionUpdate();
         UpdateUI();
         UpdateSprite();
@@ -127,6 +139,16 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     public void OnStateDown(InputAction.CallbackContext context)
     {
         if (context.started) TryApplyCurrentStateChange(increase: false);
+    }
+    public void OnRespawn(InputAction.CallbackContext context)
+    {
+        if (context.started){
+            isRespawning = true;
+        }
+        if (context.canceled){
+            respawnDownKeyTime = 1f; // タイマーをリセット
+            isRespawning = false;
+        }
     }
 
     private bool TryApplyCurrentStateChange(bool increase)
@@ -283,7 +305,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         else spriteRenderer.sprite = isFacingRight ? currentSet.airRight : currentSet.airLeft;
     }
 
-    private void HandleDesktopParamShortcuts()
+    private void HandleDesktopParamShortcuts() //多分もう使わない。
     {
         Keyboard k = Keyboard.current;
         if (k == null) return;

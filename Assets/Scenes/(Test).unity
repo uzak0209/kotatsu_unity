@@ -6605,6 +6605,7 @@ MonoBehaviour:
   statusText2: {fileID: 273274699}
   logText: {fileID: 954018290}
   networkManager: {fileID: 0}
+  playerRespawn: {fileID: 1415478038}
 --- !u!114 &1415478038
 MonoBehaviour:
   m_ObjectHideFlags: 0
