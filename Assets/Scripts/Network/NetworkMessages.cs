@@ -3,15 +3,23 @@ using UnityEngine;
 
 namespace Kotatsu.Network
 {
-    // Base message interface
     public interface INetworkMessage
     {
         string t { get; }
     }
 
+    [Serializable]
+    public class MatchPlayerState
+    {
+        public string player_id;
+        public string display_name;
+        public int color_index;
+        public int[] stage_order;
+        public int current_stage_index;
+    }
+
     #region Client to Server Messages
 
-    // Join message (Reliable)
     [Serializable]
     public class JoinMessage : INetworkMessage
     {
@@ -20,18 +28,16 @@ namespace Kotatsu.Network
         string INetworkMessage.t => t;
     }
 
-    // Parameter change message (Reliable)
     [Serializable]
     public class ParamChangeMessage : INetworkMessage
     {
         public string t = "param_change";
         public int seq;
-        public string param;      // "gravity", "friction", "speed"
-        public string direction;  // "increase", "decrease"
+        public string param;
+        public string direction;
         string INetworkMessage.t => t;
     }
 
-    // Position update message (Unreliable/Datagram)
     [Serializable]
     public class PosMessage : INetworkMessage
     {
@@ -44,11 +50,18 @@ namespace Kotatsu.Network
         string INetworkMessage.t => t;
     }
 
+    [Serializable]
+    public class StageProgressMessage : INetworkMessage
+    {
+        public string t = "stage_progress";
+        public int current_stage_index;
+        string INetworkMessage.t => t;
+    }
+
     #endregion
 
     #region Server to Client Messages
 
-    // Join OK response (Reliable)
     [Serializable]
     public class JoinOkMessage : INetworkMessage
     {
@@ -68,18 +81,17 @@ namespace Kotatsu.Network
         }
     }
 
-    // Match started broadcast (Reliable)
     [Serializable]
     public class MatchStartedMessage : INetworkMessage
     {
         public string t = "match_started";
         public string match_id;
         public long started_at_unix;
+        public MatchPlayerState[] players;
         public long server_time_ms;
         string INetworkMessage.t => t;
     }
 
-    // Parameter applied broadcast (Reliable)
     [Serializable]
     public class ParamAppliedMessage : INetworkMessage
     {
@@ -100,7 +112,6 @@ namespace Kotatsu.Network
         }
     }
 
-    // Error message (Reliable)
     [Serializable]
     public class ErrorMessage : INetworkMessage
     {
@@ -110,7 +121,6 @@ namespace Kotatsu.Network
         string INetworkMessage.t => t;
     }
 
-    // Position broadcast (Unreliable/Datagram)
     [Serializable]
     public class PosBroadcastMessage : INetworkMessage
     {
@@ -125,9 +135,18 @@ namespace Kotatsu.Network
         string INetworkMessage.t => t;
     }
 
+    [Serializable]
+    public class StageProgressBroadcastMessage : INetworkMessage
+    {
+        public string t = "stage_progress";
+        public string player_id;
+        public int current_stage_index;
+        public long server_time_ms;
+        string INetworkMessage.t => t;
+    }
+
     #endregion
 
-    // Helper to deserialize base message and determine type
     [Serializable]
     public class BaseMessage
     {
@@ -139,11 +158,15 @@ namespace Kotatsu.Network
         public static INetworkMessage Parse(string json)
         {
             if (string.IsNullOrEmpty(json))
+            {
                 return null;
+            }
 
             BaseMessage baseMsg = JsonUtility.FromJson<BaseMessage>(json);
             if (baseMsg == null || string.IsNullOrEmpty(baseMsg.t))
+            {
                 return null;
+            }
 
             switch (baseMsg.t)
             {
@@ -157,6 +180,8 @@ namespace Kotatsu.Network
                     return JsonUtility.FromJson<ErrorMessage>(json);
                 case "pos":
                     return JsonUtility.FromJson<PosBroadcastMessage>(json);
+                case "stage_progress":
+                    return JsonUtility.FromJson<StageProgressBroadcastMessage>(json);
                 default:
                     Debug.LogWarning($"Unknown message type: {baseMsg.t}");
                     return null;
