@@ -47,6 +47,7 @@ public class PlayerRespawn : MonoBehaviour
     {
         player.SetMoveAllowance(false);
         respawnEffect.PlayEffect();
+        Debug.Log("Playing respawn effect at 2: " + lastCheckpointPos);
         yield return new WaitForSeconds(2f);
         player.SetMoveAllowance(true);
     }

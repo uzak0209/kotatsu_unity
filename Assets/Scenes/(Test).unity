@@ -6854,7 +6854,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4ba3c765b45158741a14e96096543076, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0217aaae483629949ab13cb5890e7073, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7020,6 +7020,7 @@ MonoBehaviour:
   player: {fileID: 1415478037}
   GText: {fileID: 449692811}
   countdownImage: {fileID: 197133526}
+  networkManager: {fileID: 0}
   characterCountdownSprites:
   - characterName: 1
     sprite3: {fileID: 6124996449811485693, guid: aaf1314898e356f45822deef280f4450, type: 3}
@@ -7619,9 +7620,9 @@ MonoBehaviour:
   - {fileID: -2093595605, guid: 1b6272035be08ab46bc1610a8e0d0d01, type: 3}
   statusIconImage: {fileID: 1506165879}
   statusIconList:
-  - {fileID: 21300000, guid: 4ba3c765b45158741a14e96096543076, type: 3}
-  - {fileID: 21300000, guid: bc0aba8476af6e440936aacfa521684c, type: 3}
-  - {fileID: 21300000, guid: faa37bd83957b6844bbdb37ef804c34e, type: 3}
+  - {fileID: 21300000, guid: 0217aaae483629949ab13cb5890e7073, type: 3}
+  - {fileID: 21300000, guid: 5ff87db2601fef24cb1f0090bfaa4722, type: 3}
+  - {fileID: 21300000, guid: 5de9a6dc8c5084840a7ee8b99ca7f6bc, type: 3}
   statusLevelText: {fileID: 1891054663}
 --- !u!114 &1415478038
 MonoBehaviour:
@@ -7694,7 +7695,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: faa37bd83957b6844bbdb37ef804c34e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5de9a6dc8c5084840a7ee8b99ca7f6bc, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7769,7 +7770,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4ba3c765b45158741a14e96096543076, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0217aaae483629949ab13cb5890e7073, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -8622,7 +8623,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: bc0aba8476af6e440936aacfa521684c, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5ff87db2601fef24cb1f0090bfaa4722, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
