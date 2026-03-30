@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c2351f0b900ec8f41a89efc3da062b16
+guid: 5117972d95d5a6d43b4ec5183871f564
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4707358656062623890
-    second: player1_backgrond2_0
+      213: 2868539044483428322
+    second: wall_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: player1_backgrond2_0
+      name: wall_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1920
-        height: 1080
+        width: 2048
+        height: 2048
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e6fe6033e3a1caeb0800000000000000
-      internalID: -4707358656062623890
+      spriteID: 2efe5c210191fc720800000000000000
+      internalID: 2868539044483428322
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      player1_backgrond2_0: -4707358656062623890
+      wall_0: 2868539044483428322
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
