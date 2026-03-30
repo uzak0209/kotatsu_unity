@@ -60,6 +60,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
     private ControlState currentState = ControlState.Gravity;
     private float cooldownTimer = 11f; 
+
     public const float MaxCooldown = 8f;
     private float hangTimeVelocityThreshold = 2.0f; // 頂点と判定するY速度の閾値
     private float hangTimeGravityMultiplier = 0.5f; // 頂点付近での重力倍率（1より小さくするとふわっとする）
@@ -85,6 +86,11 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private Sprite[] statusIconList; // ステータスアイコン用のスプライトセット
     [SerializeField]
     private TextMeshProUGUI statusLevelText; // キャラ名表示用のTextMeshProUGUI
+
+    private bool appliedAssignedCharacter;
+    private bool subscribedToNetworkManager;
+
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -93,13 +99,34 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         controls.Player.SetCallbacks(this);
         jumpRequest = false;
         if (networkManager == null) networkManager = FindAnyObjectByType<NetworkManager>();
+
         gaugeController.StartGauge(cooldownTimer);
+
+        TryBindNetworkManager();
+
+
         // 初期値の適用
         SyncSettingsWithLevels();
     }
 
-    void OnEnable() => controls?.Enable();
-    void OnDisable() => controls?.Disable();
+    void Start()
+    {
+        ApplyLatestNetworkParamsIfAvailable();
+        ApplyAssignedCharacterIfAvailable();
+    }
+
+    void OnEnable()
+    {
+        controls?.Enable();
+        TryBindNetworkManager();
+        ApplyLatestNetworkParamsIfAvailable();
+    }
+
+    void OnDisable()
+    {
+        controls?.Disable();
+        UnsubscribeFromNetworkManager();
+    }
 
     void Update()
     {
@@ -119,6 +146,11 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
             }
         }
         // HandleDesktopParamShortcuts();　多分もう使わない。
+
+
+        ApplyAssignedCharacterIfAvailable();
+        // HandleDesktopParamShortcuts();
+
         TrySendPositionUpdate();
         TrySendStageProgressUpdate();
         UpdateUI();
@@ -176,20 +208,20 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
     private bool TryApplyCurrentStateChange(bool increase)
     {
-        // 現在のレベルが限界値なら何もしない
-        int currentLevel = currentState switch
-        {
-            ControlState.Gravity => gravityLevel,
-            ControlState.Speed => speedLevel,
-            ControlState.Friction => frictionLevel,
-            _ => 1
-        };
+        int maxLevel = GetMaxLevelForState(currentState);
 
-        if (increase && currentLevel >= 2) return false;
+        // 現在のレベルが限界値なら何もしない
+        int currentLevel = GetCurrentLevel(currentState);
+
+        if (increase && currentLevel >= maxLevel) return false;
         if (!increase && currentLevel <= 0) return false;
 
-        // 通信：レベル変更を試みる意思を送信
-        SendParamChangeOverNetwork(increase);
+        bool useAuthoritativeNetwork = networkManager != null && networkManager.IsConnected;
+        if (useAuthoritativeNetwork)
+        {
+            SendParamChangeOverNetwork(increase);
+            return true;
+        }
 
         if (cooldownTimer > 0f) return false;
 
@@ -223,6 +255,9 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
         // if (logText != null) logText.text = $"あなたが{statName}変更:{newVal:F1}";
         
+
+        ApplyLocalStateDelta(increase ? 1 : -1);
+
         cooldownTimer = MaxCooldown;
         return true;
     }
@@ -325,6 +360,128 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         networkManager.UpdateStageProgress(currentStageIndex);
     }
 
+    private void TryBindNetworkManager()
+    {
+        if (networkManager == null)
+        {
+            networkManager = FindAnyObjectByType<NetworkManager>();
+        }
+
+        if (networkManager == null || subscribedToNetworkManager)
+        {
+            return;
+        }
+
+        networkManager.OnPlayerParamsChanged += HandlePlayerParamsChanged;
+        subscribedToNetworkManager = true;
+    }
+
+    private void UnsubscribeFromNetworkManager()
+    {
+        if (networkManager == null || !subscribedToNetworkManager)
+        {
+            return;
+        }
+
+        networkManager.OnPlayerParamsChanged -= HandlePlayerParamsChanged;
+        subscribedToNetworkManager = false;
+    }
+
+    private void ApplyLatestNetworkParamsIfAvailable()
+    {
+        if (networkManager == null)
+        {
+            return;
+        }
+
+        if (networkManager.TryGetLatestParams(out int gravity, out int friction, out int speed))
+        {
+            ApplyAuthoritativeParams(gravity, friction, speed, null);
+        }
+    }
+
+    private void HandlePlayerParamsChanged(string playerId, int gravity, int friction, int speed)
+    {
+        ApplyAuthoritativeParams(gravity, friction, speed, playerId);
+    }
+
+    private void ApplyAuthoritativeParams(int gravity, int friction, int speed, string sourcePlayerId)
+    {
+        int previousGravity = gravityLevel;
+        int previousFriction = frictionLevel;
+        int previousSpeed = speedLevel;
+
+        gravityLevel = ConvertServerLevelToLocalIndex(gravity, 2);
+        frictionLevel = ConvertServerLevelToLocalIndex(friction, 1);
+        speedLevel = ConvertServerLevelToLocalIndex(speed, 2);
+        SyncSettingsWithLevels();
+
+        bool changed = previousGravity != gravityLevel || previousFriction != frictionLevel || previousSpeed != speedLevel;
+        if (!changed || logText == null || string.IsNullOrWhiteSpace(sourcePlayerId))
+        {
+            return;
+        }
+
+        bool changedBySelf = networkManager != null &&
+            !string.IsNullOrWhiteSpace(networkManager.CurrentPlayerId) &&
+            string.Equals(networkManager.CurrentPlayerId, sourcePlayerId, System.StringComparison.Ordinal);
+
+        string actor = changedBySelf ? "あなた" : sourcePlayerId;
+        logText.text = $"{actor}の変更を反映 G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
+    }
+
+    private void ApplyLocalStateDelta(int diff)
+    {
+        switch (currentState)
+        {
+            case ControlState.Gravity:
+                gravityLevel += diff;
+                break;
+            case ControlState.Speed:
+                speedLevel += diff;
+                break;
+            case ControlState.Friction:
+                frictionLevel += diff;
+                break;
+        }
+
+        SyncSettingsWithLevels();
+
+        string statName = currentState.ToString();
+        float newVal = currentState switch
+        {
+            ControlState.Gravity => settings.gravityScale,
+            ControlState.Speed => settings.moveSpeed,
+            _ => settings.friction
+        };
+
+        if (logText != null)
+        {
+            logText.text = $"あなたが{statName}変更:{newVal:F1}";
+        }
+    }
+
+    private int GetCurrentLevel(ControlState state)
+    {
+        return state switch
+        {
+            ControlState.Gravity => gravityLevel,
+            ControlState.Speed => speedLevel,
+            ControlState.Friction => frictionLevel,
+            _ => 1
+        };
+    }
+
+    private static int GetMaxLevelForState(ControlState state)
+    {
+        return state == ControlState.Friction ? 1 : 2;
+    }
+
+    private static int ConvertServerLevelToLocalIndex(int serverLevel, int maxLocalIndex)
+    {
+        return Mathf.Clamp(serverLevel - 1, 0, maxLocalIndex);
+    }
+
     // --- UI/Visual ---
     private void UpdateUI()
     {
@@ -383,6 +540,22 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     }
 
     private void SelectControlState(ControlState nextState) => currentState = nextState;
+
+    private void ApplyAssignedCharacterIfAvailable()
+    {
+        if (appliedAssignedCharacter || networkManager == null)
+        {
+            return;
+        }
+
+        if (!networkManager.TryGetPlayerMatchState(networkManager.CurrentPlayerId, out MatchPlayerState playerState))
+        {
+            return;
+        }
+
+        selectedCharacterIndex = Mathf.Clamp(playerState.color_index, 0, Mathf.Max(0, characterList.Length - 1));
+        appliedAssignedCharacter = true;
+    }
 
     private void OnCollisionStay2D(Collision2D collision) => isGrounded = true;
     private void OnCollisionExit2D(Collision2D collision) => isGrounded = false;

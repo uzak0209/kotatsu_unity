@@ -24,6 +24,7 @@ public class SketchCharacterLook : MonoBehaviour
     private static Sprite blobSprite;
     private static Sprite batSprite;
     private static Material sharedSpriteMaterial;
+    private int forcedVariantIndex = -1;
 
     private void Awake()
     {
@@ -41,6 +42,12 @@ public class SketchCharacterLook : MonoBehaviour
         sr.color = Color.white;
         sr.flipX = false;
         sr.flipY = false;
+    }
+
+    public void SetVariantIndex(int variantIndex)
+    {
+        forcedVariantIndex = Mathf.Clamp(variantIndex, 0, 3);
+        ApplyLook();
     }
 
     private static Material GetSharedSpriteMaterial()
@@ -61,6 +68,11 @@ public class SketchCharacterLook : MonoBehaviour
 
     private CharacterVariant ResolveVariant(string objectName)
     {
+        if (forcedVariantIndex >= 0)
+        {
+            return (CharacterVariant)forcedVariantIndex;
+        }
+
         if (objectName.Contains("4")) return CharacterVariant.Bat4P;
         if (objectName.Contains("3")) return CharacterVariant.Blob3P;
         if (objectName.Contains("2")) return CharacterVariant.Frog2P;
