@@ -302,6 +302,39 @@ namespace Kotatsu.Network
             ));
         }
 
+        public void SubmitFinish(Action<MatchmakingClient.FinishMatchResponse> onSuccess = null, Action<string> onError = null)
+        {
+            if (string.IsNullOrWhiteSpace(currentMatchId))
+            {
+                onError?.Invoke("Match ID is empty.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(currentPlayerId))
+            {
+                onError?.Invoke("Player ID is empty.");
+                return;
+            }
+
+            if (matchmakingClient == null)
+            {
+                onError?.Invoke("Matchmaking client is not initialized.");
+                return;
+            }
+
+            StartCoroutine(matchmakingClient.FinishMatch(
+                currentMatchId,
+                currentPlayerId,
+                onSuccess,
+                error =>
+                {
+                    Debug.LogError($"Failed to submit finish: {error}");
+                    OnNetworkError?.Invoke(error);
+                    onError?.Invoke(error);
+                }
+            ));
+        }
+
         // Create and join a new match
         public void CreateAndJoinMatch(Action onSuccess = null, Action<string> onError = null)
         {

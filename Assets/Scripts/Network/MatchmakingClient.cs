@@ -90,6 +90,22 @@ namespace Kotatsu.Network
             public long started_at_unix;
         }
 
+        [Serializable]
+        public class FinishMatchRequest
+        {
+            public string player_id;
+        }
+
+        [Serializable]
+        public class FinishMatchResponse
+        {
+            public string match_id;
+            public string player_id;
+            public int rank;
+            public int finished_player_count;
+            public int total_players;
+        }
+
         public IEnumerator CreateMatch(Action<CreateMatchResponse> onSuccess, Action<string> onError)
         {
             string url = $"{baseUrl}/v1/matches";
@@ -263,6 +279,41 @@ namespace Kotatsu.Network
                 {
                     string errorMsg = TryParseError(request.downloadHandler.text) ?? request.error;
                     onError?.Invoke($"Start match failed: {errorMsg}");
+                }
+            }
+        }
+
+        public IEnumerator FinishMatch(string matchId, string playerId, Action<FinishMatchResponse> onSuccess, Action<string> onError)
+        {
+            string url = $"{baseUrl}/v1/matches/{matchId}/finish";
+            FinishMatchRequest requestBody = new FinishMatchRequest { player_id = playerId };
+            string jsonBody = JsonUtility.ToJson(requestBody);
+
+            using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+            {
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.SetRequestHeader("Content-Type", "application/json");
+
+                yield return request.SendWebRequest();
+
+                if (request.result == UnityWebRequest.Result.Success)
+                {
+                    try
+                    {
+                        FinishMatchResponse response = JsonUtility.FromJson<FinishMatchResponse>(request.downloadHandler.text);
+                        onSuccess?.Invoke(response);
+                    }
+                    catch (Exception e)
+                    {
+                        onError?.Invoke($"Failed to parse response: {e.Message}");
+                    }
+                }
+                else
+                {
+                    string errorMsg = TryParseError(request.downloadHandler.text) ?? request.error;
+                    onError?.Invoke($"Finish match failed: {errorMsg}");
                 }
             }
         }
