@@ -1205,7 +1205,34 @@ MonoBehaviour:
     - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
     - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
     - {fileID: 6536185710592984564, guid: ea3694427c3928443ac90b122843a7e7, type: 3}
+    - {fileID: 6536185710592984564, guid: 75025bc9bb7850f4fbcc2375d10464e3, type: 3}
+  - characterName: player2
+    startArea: {fileID: 6536185710592984564, guid: 8f093dcc6153d894fa9c6befdb4a5889, type: 3}
+    goalArea: {fileID: 6536185710592984564, guid: 2ee546b95b5e2a94991c39b4f7ca1159, type: 3}
+    stageChunks:
+    - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
+    - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
+    - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
     - {fileID: 6536185710592984564, guid: ea3694427c3928443ac90b122843a7e7, type: 3}
+    - {fileID: 6536185710592984564, guid: 75025bc9bb7850f4fbcc2375d10464e3, type: 3}
+  - characterName: player3
+    startArea: {fileID: 6536185710592984564, guid: 3d821fabf2555cf4f93ae083739dcdb7, type: 3}
+    goalArea: {fileID: 6536185710592984564, guid: bf1991976df59a94fb7b7fdf4223d49f, type: 3}
+    stageChunks:
+    - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
+    - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
+    - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
+    - {fileID: 6536185710592984564, guid: ea3694427c3928443ac90b122843a7e7, type: 3}
+    - {fileID: 6536185710592984564, guid: 75025bc9bb7850f4fbcc2375d10464e3, type: 3}
+  - characterName: player4
+    startArea: {fileID: 6536185710592984564, guid: b9ce47bb1bf93ef4598fbef0afee21a6, type: 3}
+    goalArea: {fileID: 6536185710592984564, guid: e2b3921c37847d840ac95abd66fba817, type: 3}
+    stageChunks:
+    - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
+    - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
+    - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
+    - {fileID: 6536185710592984564, guid: ea3694427c3928443ac90b122843a7e7, type: 3}
+    - {fileID: 6536185710592984564, guid: 75025bc9bb7850f4fbcc2375d10464e3, type: 3}
   selectedCharacterIndex: 0
   chunkCount: 4
   chunkWidth: 19.2
