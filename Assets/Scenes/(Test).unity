@@ -644,7 +644,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &273274699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -856,7 +856,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &449692810
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7355,22 +7355,22 @@ MonoBehaviour:
   - characterName: k
     groundRight: {fileID: 21300000, guid: d6c730bbb16e41645bd09477f345ac88, type: 3}
     groundLeft: {fileID: 21300000, guid: 56eed89626dbb804d9999d52f4aa9060, type: 3}
-    airRight: {fileID: 21300000, guid: 80881b2e8666f5140a56ebfc7b36e16c, type: 3}
+    airRight: {fileID: -7027284290635800400, guid: 80881b2e8666f5140a56ebfc7b36e16c, type: 3}
     airLeft: {fileID: 21300000, guid: 8aaa59a3fff9398458e2d53e8daee6a9, type: 3}
   - characterName: null
     groundRight: {fileID: 21300000, guid: df1f551dac65d3c4db1089781ee30537, type: 3}
     groundLeft: {fileID: 21300000, guid: f0017874b92821846ae4780ebb2c9d9d, type: 3}
-    airRight: {fileID: 21300000, guid: 21def21895fde7043ad6457db8beec4c, type: 3}
+    airRight: {fileID: 1993837983520532814, guid: 21def21895fde7043ad6457db8beec4c, type: 3}
     airLeft: {fileID: 21300000, guid: 5953573d32a568043a3ffa433142b749, type: 3}
   - characterName: nya
     groundRight: {fileID: 21300000, guid: c8d9ea86fbd8c8446ab18228257eb294, type: 3}
     groundLeft: {fileID: 21300000, guid: 660d919cb7917ab4a98b9d8cbf2ca178, type: 3}
-    airRight: {fileID: 21300000, guid: 7309e0e506cb34c4b919ea875a0c2bc9, type: 3}
+    airRight: {fileID: 925554919074253941, guid: 7309e0e506cb34c4b919ea875a0c2bc9, type: 3}
     airLeft: {fileID: 21300000, guid: 499fbb5f79e92e041bc5811122dc4c37, type: 3}
   - characterName: pp
     groundRight: {fileID: 21300000, guid: 0e87a1d3358bdc44e9625e4d334170e3, type: 3}
     groundLeft: {fileID: 21300000, guid: 4621f28c60bea4a4eb6cf073b2fd89dd, type: 3}
-    airRight: {fileID: 21300000, guid: 1b6272035be08ab46bc1610a8e0d0d01, type: 3}
+    airRight: {fileID: 381599156790792504, guid: 1b6272035be08ab46bc1610a8e0d0d01, type: 3}
     airLeft: {fileID: 21300000, guid: fff7f886071a0e348a7f1b4e477051a4, type: 3}
   selectedCharacterIndex: 0
   gravityLevel: 1
