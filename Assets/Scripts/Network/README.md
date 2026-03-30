@@ -54,6 +54,11 @@ Assets/Scripts/Network/
 {"t":"pos","seq":42,"x":12.3,"y":4.5,"vx":0.1,"vy":-0.2}
 ```
 
+**Stage Progress**:
+```json
+{"t":"stage_progress","current_stage_index":2}
+```
+
 #### Server → Client (Reliable)
 
 **Join OK**:
@@ -97,6 +102,16 @@ Assets/Scripts/Network/
   "vx":0.1,
   "vy":-0.2,
   "server_time_ms":1761000000789
+}
+```
+
+**Stage Progress Broadcast**:
+```json
+{
+  "t":"stage_progress",
+  "player_id":"p_other",
+  "current_stage_index":2,
+  "server_time_ms":1761000000901
 }
 ```
 

@@ -13,6 +13,8 @@ public class StageManager : MonoBehaviour
         public GameObject[] stageChunks; // 各キャラごとのステージパーツ（n個）
     }
 
+    public static StageManager Instance { get; private set; }
+
     [Header("Visual Settings")]
     [SerializeField] private CharacterStageSet[] characterStages; // 4体分
     [SerializeField] private int selectedCharacterIndex = 0;
@@ -20,9 +22,12 @@ public class StageManager : MonoBehaviour
     [Header("Generation Settings")]
     [SerializeField] private int chunkCount = 5;
     [SerializeField] private float chunkWidth = 19.2f;
+    private int generatedStageCount;
 
     void Awake()
     {
+        Instance = this;
+
         // プレイヤーの選択を自動取得（存在すれば）
         PlayerController player = Object.FindFirstObjectByType<PlayerController>();
         if (player != null)
@@ -31,6 +36,14 @@ public class StageManager : MonoBehaviour
         }
 
         GenerateStage();
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     void GenerateStage()
@@ -51,6 +64,7 @@ public class StageManager : MonoBehaviour
 
         // 用意されたパーツ数以上のchunkCountが指定された場合のための安全策
         int actualGenCount = Mathf.Min(chunkCount, availableChunks.Count);
+        generatedStageCount = actualGenCount;
 
         for (int i = 0; i < actualGenCount; i++)
         {
@@ -61,6 +75,28 @@ public class StageManager : MonoBehaviour
 
         // 3. 指定色のゴール地点
         Instantiate(currentSet.goalArea, new Vector3(currentX, 0, 0), Quaternion.identity);
+    }
+
+    public int GetCurrentStageIndexForPosition(float worldX)
+    {
+        if (generatedStageCount <= 0)
+        {
+            return 0;
+        }
+
+        if (worldX < chunkWidth)
+        {
+            return 0;
+        }
+
+        float generatedEndX = chunkWidth + generatedStageCount * chunkWidth * 2f;
+        if (worldX >= generatedEndX)
+        {
+            return generatedStageCount + 1;
+        }
+
+        int stageIndex = Mathf.FloorToInt((worldX - chunkWidth) / (chunkWidth * 2f));
+        return Mathf.Clamp(stageIndex + 1, 1, generatedStageCount);
     }
 
     // リストをランダムに並び替える（フィッシャー・イェーツのシャッフル）

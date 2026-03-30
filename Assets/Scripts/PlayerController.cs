@@ -50,8 +50,11 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private bool isGrounded;
     private bool canMove = false; 
     private float nextNetworkSendTime;
+    private float nextNetworkStageSendTime;
     private bool isFacingRight = true;
     private float networkPositionSendInterval = 0.05f;
+    private float networkStageSendInterval = 0.2f;
+    private int lastSentStageIndex = -1;
 
     public void SetMoveAllowance(bool allowance) => canMove = allowance;
 
@@ -117,6 +120,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         }
         // HandleDesktopParamShortcuts();　多分もう使わない。
         TrySendPositionUpdate();
+        TrySendStageProgressUpdate();
         UpdateUI();
         UpdateSprite();
     }
@@ -303,6 +307,22 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         Vector2 pos = transform.position;
         Vector2 vel = rb.linearVelocity;
         networkManager.UpdatePosition(pos.x, pos.y, vel.x, vel.y);
+    }
+
+    private void TrySendStageProgressUpdate()
+    {
+        if (networkManager == null || !networkManager.IsConnected) return;
+
+        StageManager stageManager = StageManager.Instance != null ? StageManager.Instance : FindFirstObjectByType<StageManager>();
+        if (stageManager == null) return;
+
+        int currentStageIndex = stageManager.GetCurrentStageIndexForPosition(transform.position.x);
+        bool stageChanged = currentStageIndex != lastSentStageIndex;
+        if (!stageChanged && Time.unscaledTime < nextNetworkStageSendTime) return;
+
+        lastSentStageIndex = currentStageIndex;
+        nextNetworkStageSendTime = Time.unscaledTime + networkStageSendInterval;
+        networkManager.UpdateStageProgress(currentStageIndex);
     }
 
     // --- UI/Visual ---
