@@ -49,14 +49,14 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private float networkPositionSendInterval = 0.05f;
     private float networkStageSendInterval = 0.2f;
     private int lastSentStageIndex = -1;
-    private bool appliedAssignedCharacter;
-    private bool subscribedToNetworkManager;
 
     public void SetMoveAllowance(bool allowance) => canMove = allowance;
 
     private ControlState currentState = ControlState.Gravity;
     private float cooldownTimer = 11f; 
     private const float MaxCooldown = 8f;
+    private bool appliedAssignedCharacter;
+    private bool subscribedToNetworkManager;
 
     void Awake()
     {
@@ -241,19 +241,6 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         networkManager.UpdateStageProgress(currentStageIndex);
     }
 
-    private void ApplyAssignedCharacterIfAvailable()
-    {
-        if (appliedAssignedCharacter || networkManager == null) return;
-
-        if (!networkManager.TryGetPlayerMatchState(networkManager.CurrentPlayerId, out MatchPlayerState playerState))
-        {
-            return;
-        }
-
-        selectedCharacterIndex = Mathf.Clamp(playerState.color_index, 0, Mathf.Max(0, characterList.Length - 1));
-        appliedAssignedCharacter = true;
-    }
-
     private void TryBindNetworkManager()
     {
         if (networkManager == null)
@@ -417,6 +404,22 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     }
 
     private void SelectControlState(ControlState nextState) => currentState = nextState;
+
+    private void ApplyAssignedCharacterIfAvailable()
+    {
+        if (appliedAssignedCharacter || networkManager == null)
+        {
+            return;
+        }
+
+        if (!networkManager.TryGetPlayerMatchState(networkManager.CurrentPlayerId, out MatchPlayerState playerState))
+        {
+            return;
+        }
+
+        selectedCharacterIndex = Mathf.Clamp(playerState.color_index, 0, Mathf.Max(0, characterList.Length - 1));
+        appliedAssignedCharacter = true;
+    }
 
     private void OnCollisionStay2D(Collision2D collision) => isGrounded = true;
     private void OnCollisionExit2D(Collision2D collision) => isGrounded = false;

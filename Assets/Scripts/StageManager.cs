@@ -18,7 +18,7 @@ public class StageManager : MonoBehaviour
 
     [Header("Visual Settings")]
     [SerializeField] private CharacterStageSet[] characterStages;
-    [SerializeField] private int selectedCharacterIndex;
+    [SerializeField] private int selectedCharacterIndex = 0;
 
     [Header("Generation Settings")]
     [SerializeField] private int chunkCount = 5;
@@ -27,16 +27,6 @@ public class StageManager : MonoBehaviour
     private NetworkManager networkManager;
     private int[] generatedStageOrder = Array.Empty<int>();
     private int generatedStageCount;
-
-    public int[] GeneratedStageOrder
-    {
-        get
-        {
-            int[] copy = new int[generatedStageOrder.Length];
-            Array.Copy(generatedStageOrder, copy, copy.Length);
-            return copy;
-        }
-    }
 
     private void Awake()
     {
@@ -51,6 +41,16 @@ public class StageManager : MonoBehaviour
         if (Instance == this)
         {
             Instance = null;
+        }
+    }
+
+    public int[] GeneratedStageOrder
+    {
+        get
+        {
+            int[] copy = new int[generatedStageOrder.Length];
+            Array.Copy(generatedStageOrder, copy, copy.Length);
+            return copy;
         }
     }
 
@@ -89,10 +89,11 @@ public class StageManager : MonoBehaviour
         currentX += chunkWidth;
 
         List<int> stageIndices = BuildStageIndices(currentSet);
-        generatedStageOrder = stageIndices.ToArray();
-        generatedStageCount = generatedStageOrder.Length;
+        int actualGenCount = Mathf.Min(chunkCount, stageIndices.Count);
+        generatedStageOrder = stageIndices.GetRange(0, actualGenCount).ToArray();
+        generatedStageCount = actualGenCount;
 
-        for (int i = 0; i < generatedStageOrder.Length; i++)
+        for (int i = 0; i < actualGenCount; i++)
         {
             int stageIndex = generatedStageOrder[i];
             GameObject selected = currentSet.stageChunks[stageIndex];
@@ -132,13 +133,7 @@ public class StageManager : MonoBehaviour
             available.Add(i);
         }
 
-        Shuffle(available);
-        int actualGenCount = Mathf.Min(chunkCount, available.Count);
-        if (actualGenCount < available.Count)
-        {
-            available.RemoveRange(actualGenCount, available.Count - actualGenCount);
-        }
-
+        ShuffleIndices(available);
         return available;
     }
 
@@ -182,7 +177,7 @@ public class StageManager : MonoBehaviour
         return Mathf.Clamp(stageIndex + 1, 1, generatedStageCount);
     }
 
-    private void Shuffle(List<int> list)
+    private void ShuffleIndices(List<int> list)
     {
         for (int i = list.Count - 1; i > 0; i--)
         {
