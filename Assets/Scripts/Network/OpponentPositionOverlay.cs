@@ -37,6 +37,20 @@ namespace Kotatsu.Network
             public string label;
         }
 
+        private static readonly StageLocationPresentation FixedStartPresentation = new StageLocationPresentation
+        {
+            hasSprite = true,
+            visualKind = LocationVisualKind.Start,
+            label = "Kamakura"
+        };
+
+        private static readonly StageLocationPresentation FixedGoalPresentation = new StageLocationPresentation
+        {
+            hasSprite = true,
+            visualKind = LocationVisualKind.Home,
+            label = "Home"
+        };
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
         {
@@ -303,34 +317,29 @@ namespace Kotatsu.Network
 
             statusText.gameObject.SetActive(false);
 
-            MatchPlayerState[] players = networkManager.CurrentMatchPlayers;
-            HashSet<string> keepIds = new HashSet<string>();
-
-            for (int i = 0; i < players.Length; i++)
+            string currentPlayerId = networkManager.CurrentPlayerId;
+            if (string.IsNullOrWhiteSpace(currentPlayerId) ||
+                !networkManager.TryGetPlayerMatchState(currentPlayerId, out MatchPlayerState currentPlayerState) ||
+                currentPlayerState == null)
             {
-                MatchPlayerState playerState = players[i];
-                if (playerState == null || string.IsNullOrWhiteSpace(playerState.player_id))
-                {
-                    continue;
-                }
+                statusText.gameObject.SetActive(true);
+                statusText.text = "Loading map...";
+                ClearRows();
+                return;
+            }
 
-                keepIds.Add(playerState.player_id);
-                EnsureRow(playerState);
-                UpdateSingleRow(playerState.player_id);
+            EnsureRow(currentPlayerState);
+            UpdateSingleRow(currentPlayerId);
 
-                if (rowsByPlayerId.TryGetValue(playerState.player_id, out PlayerTrackerRow row) && row.root != null)
-                {
-                    int siblingIndex = string.Equals(playerState.player_id, networkManager.CurrentPlayerId, System.StringComparison.Ordinal)
-                        ? 1
-                        : keepIds.Count;
-                    row.root.SetSiblingIndex(siblingIndex);
-                }
+            if (rowsByPlayerId.TryGetValue(currentPlayerId, out PlayerTrackerRow currentRow) && currentRow.root != null)
+            {
+                currentRow.root.SetSiblingIndex(1);
             }
 
             List<string> staleIds = null;
             foreach (KeyValuePair<string, PlayerTrackerRow> kv in rowsByPlayerId)
             {
-                if (keepIds.Contains(kv.Key))
+                if (string.Equals(kv.Key, currentPlayerId, System.StringComparison.Ordinal))
                 {
                     continue;
                 }
@@ -451,12 +460,7 @@ namespace Kotatsu.Network
         {
             if (currentStageIndex <= 0)
             {
-                return new StageLocationPresentation
-                {
-                    hasSprite = true,
-                    visualKind = LocationVisualKind.Home,
-                    label = "Home"
-                };
+                return FixedStartPresentation;
             }
 
             if (playerState != null &&
@@ -469,12 +473,7 @@ namespace Kotatsu.Network
 
             if (playerState != null && playerState.stage_order != null && currentStageIndex > playerState.stage_order.Length)
             {
-                return new StageLocationPresentation
-                {
-                    hasSprite = false,
-                    visualKind = LocationVisualKind.Mountain,
-                    label = "Goal"
-                };
+                return FixedGoalPresentation;
             }
 
             return new StageLocationPresentation
@@ -628,12 +627,7 @@ namespace Kotatsu.Network
                 return stages;
             }
 
-            stages.Add(new StageLocationPresentation
-            {
-                hasSprite = true,
-                visualKind = LocationVisualKind.Home,
-                label = "Home"
-            });
+            stages.Add(FixedStartPresentation);
 
             if (playerState.stage_order != null)
             {
@@ -642,6 +636,8 @@ namespace Kotatsu.Network
                     stages.Add(ResolveStageOrderValue(playerState.stage_order[i]));
                 }
             }
+
+            stages.Add(FixedGoalPresentation);
 
             return stages;
         }
@@ -669,8 +665,8 @@ namespace Kotatsu.Network
                 0 => new StageLocationPresentation
                 {
                     hasSprite = true,
-                    visualKind = LocationVisualKind.Straight,
-                    label = "Straight"
+                    visualKind = LocationVisualKind.Home,
+                    label = "Home"
                 },
                 1 => new StageLocationPresentation
                 {
@@ -692,9 +688,9 @@ namespace Kotatsu.Network
                 },
                 3 => new StageLocationPresentation
                 {
-                    hasSprite = false,
-                    visualKind = LocationVisualKind.Mountain,
-                    label = "Bonus"
+                    hasSprite = true,
+                    visualKind = LocationVisualKind.Straight,
+                    label = "Straight"
                 },
                 _ => new StageLocationPresentation
                 {

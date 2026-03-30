@@ -5,6 +5,7 @@ namespace Kotatsu.Network
 {
     public enum LocationVisualKind
     {
+        Start,
         Home,
         Straight,
         Sasuke,
@@ -18,6 +19,7 @@ namespace Kotatsu.Network
         [Serializable]
         private struct PlayerLocationSprites
         {
+            public Sprite start;
             public Sprite home;
             public Sprite straight;
             public Sprite sasuke;
@@ -40,6 +42,7 @@ namespace Kotatsu.Network
 
             return kind switch
             {
+                LocationVisualKind.Start => sprites.start,
                 LocationVisualKind.Home => sprites.home,
                 LocationVisualKind.Straight => sprites.straight,
                 LocationVisualKind.Sasuke => sprites.sasuke,
