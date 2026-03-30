@@ -1210,30 +1210,30 @@ MonoBehaviour:
     startArea: {fileID: 6536185710592984564, guid: 8f093dcc6153d894fa9c6befdb4a5889, type: 3}
     goalArea: {fileID: 6536185710592984564, guid: 2ee546b95b5e2a94991c39b4f7ca1159, type: 3}
     stageChunks:
-    - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
-    - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
-    - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
-    - {fileID: 6536185710592984564, guid: ea3694427c3928443ac90b122843a7e7, type: 3}
-    - {fileID: 6536185710592984564, guid: 75025bc9bb7850f4fbcc2375d10464e3, type: 3}
+    - {fileID: 6536185710592984564, guid: 5459ab80ebd1c844e97b29ae11be5d24, type: 3}
+    - {fileID: 6536185710592984564, guid: e8e210d5ab394f1479a2c9ca736b7d8c, type: 3}
+    - {fileID: 6536185710592984564, guid: 422b76d2896fd2f40b9810b5b617ef8f, type: 3}
+    - {fileID: 6536185710592984564, guid: ced766c0a8fc34540ae59d950559be7c, type: 3}
+    - {fileID: 6536185710592984564, guid: 00920fec7117fe04cb87402f2cf69e8c, type: 3}
   - characterName: player3
     startArea: {fileID: 6536185710592984564, guid: 3d821fabf2555cf4f93ae083739dcdb7, type: 3}
     goalArea: {fileID: 6536185710592984564, guid: bf1991976df59a94fb7b7fdf4223d49f, type: 3}
     stageChunks:
-    - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
-    - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
-    - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
-    - {fileID: 6536185710592984564, guid: ea3694427c3928443ac90b122843a7e7, type: 3}
-    - {fileID: 6536185710592984564, guid: 75025bc9bb7850f4fbcc2375d10464e3, type: 3}
+    - {fileID: 6536185710592984564, guid: 0ea1ca4e8cb9e8c40ae164903a90844c, type: 3}
+    - {fileID: 6536185710592984564, guid: bd10a751f9bf6c743b31ffaa4134544e, type: 3}
+    - {fileID: 6536185710592984564, guid: bc66166155b776943aba0197730a63ec, type: 3}
+    - {fileID: 6536185710592984564, guid: 9ffc33e136551f64aa80c05ec7ceeaf3, type: 3}
+    - {fileID: 6536185710592984564, guid: b9aa9f87b7afb37419cd237f5af54fe3, type: 3}
   - characterName: player4
     startArea: {fileID: 6536185710592984564, guid: b9ce47bb1bf93ef4598fbef0afee21a6, type: 3}
     goalArea: {fileID: 6536185710592984564, guid: e2b3921c37847d840ac95abd66fba817, type: 3}
     stageChunks:
-    - {fileID: 6536185710592984564, guid: bd1fdaf127337c04192f6314f5a1e141, type: 3}
-    - {fileID: 6536185710592984564, guid: f3be931574512f346a56e9fcf9e5645b, type: 3}
-    - {fileID: 6536185710592984564, guid: 9b9273dde253ad243ba22474fac0abd2, type: 3}
-    - {fileID: 6536185710592984564, guid: ea3694427c3928443ac90b122843a7e7, type: 3}
-    - {fileID: 6536185710592984564, guid: 75025bc9bb7850f4fbcc2375d10464e3, type: 3}
-  selectedCharacterIndex: 0
+    - {fileID: 6536185710592984564, guid: eab917a1161333341a1a3ab4f41465c9, type: 3}
+    - {fileID: 6536185710592984564, guid: ca7ac3deba72c744392aec007f39bd3c, type: 3}
+    - {fileID: 6536185710592984564, guid: 4ee960899eaa03f43b705d3504908244, type: 3}
+    - {fileID: 6536185710592984564, guid: c1659ee419f9c1c459a6a916e52e1a79, type: 3}
+    - {fileID: 6536185710592984564, guid: 03df5c42e34d04543a80977d9a0ab9c2, type: 3}
+  selectedCharacterIndex: 3
   chunkCount: 4
   chunkWidth: 19.2
 --- !u!114 &1101257597
@@ -1272,7 +1272,7 @@ MonoBehaviour:
     sprite2: {fileID: -5012875565831533185, guid: 4e39aca3e2303b34eaeeeecf54b84644, type: 3}
     sprite1: {fileID: 5408507323681237346, guid: ff4e607b0c92baa468d44cafb125e60f, type: 3}
     spriteStart: {fileID: -1450881227439338575, guid: 271d35855a34276428cd793a6980e15a, type: 3}
-  selectedCharacterIndex: 0
+  selectedCharacterIndex: 3
   audioSource: {fileID: 1357989083}
   countdownSE: {fileID: 8300000, guid: 437e35191bc4dde4688937ba2edcc9f9, type: 3}
   startSE: {fileID: 8300000, guid: 33805dd2676bb6540b5445f763405bb5, type: 3}
@@ -1608,7 +1608,7 @@ MonoBehaviour:
     groundLeft: {fileID: 21300000, guid: 4621f28c60bea4a4eb6cf073b2fd89dd, type: 3}
     airRight: {fileID: 21300000, guid: 1b6272035be08ab46bc1610a8e0d0d01, type: 3}
     airLeft: {fileID: 21300000, guid: fff7f886071a0e348a7f1b4e477051a4, type: 3}
-  selectedCharacterIndex: 0
+  selectedCharacterIndex: 3
   gravityLevel: 1
   speedLevel: 1
   frictionLevel: 1
