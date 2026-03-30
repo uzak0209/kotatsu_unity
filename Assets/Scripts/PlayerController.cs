@@ -80,15 +80,17 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
     private Image characterIconImage; // キャラアイコン表示用のSpriteRenderer
     [SerializeField]
     private Sprite[] characterIconList; // キャラアイコン用のスプライトセット
-    [SerializeField]
-    private Image statusIconImage; // ステータスアイコン表示用のImage
-    [SerializeField]
-    private Sprite[] statusIconList; // ステータスアイコン用のスプライトセット
-    [SerializeField]
-    private TextMeshProUGUI statusLevelText; // キャラ名表示用のTextMeshProUGUI
+    // [SerializeField]
+    // private Image statusIconImage; // ステータスアイコン表示用のImage
+    // [SerializeField]
+    // private Sprite[] statusIconList; // ステータスアイコン用のスプライトセット
+    // [SerializeField]
+    // private TextMeshProUGUI statusLevelText; // キャラ名表示用のTextMeshProUGUI
 
     private bool appliedAssignedCharacter;
     private bool subscribedToNetworkManager;
+    [SerializeField]
+    private LogManager logManager;
 
 
     void Awake()
@@ -149,7 +151,6 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
 
         ApplyAssignedCharacterIfAvailable();
-        // HandleDesktopParamShortcuts();
 
         TrySendPositionUpdate();
         TrySendStageProgressUpdate();
@@ -236,16 +237,27 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         gaugeController.StartGauge(MaxCooldown);
         SyncSettingsWithLevels();
         
-        switch (currentState)
-        {
-            case ControlState.Gravity: statusIconImage.sprite = statusIconList[0];
-            statusLevelText.text = gravityLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
-            case ControlState.Speed: statusIconImage.sprite = statusIconList[1];
-            statusLevelText.text = speedLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
-            case ControlState.Friction: statusIconImage.sprite = statusIconList[2];
-            statusLevelText.text = frictionLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+        // switch (currentState)
+        // {
+        //     case ControlState.Gravity: statusIconImage.sprite = statusIconList[0];
+        //     statusLevelText.text = gravityLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+        //     case ControlState.Speed: statusIconImage.sprite = statusIconList[1];
+        //     statusLevelText.text = speedLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+        //     case ControlState.Friction: statusIconImage.sprite = statusIconList[2];
+        //     statusLevelText.text = frictionLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+        // }
+        if (logManager != null)        {
+            int beforeIndex = (int)currentState;
+            int afterIndex = currentState switch
+            {
+                ControlState.Gravity => gravityLevel,
+                ControlState.Speed => speedLevel,
+                ControlState.Friction => frictionLevel,
+                _ => 1
+            };
+            logManager.ShowLog(beforeIndex, afterIndex);
         }
-        characterIconImage.sprite = characterIconList[selectedCharacterIndex]; //本来はselectedCharacterIndexではなく変えた人。
+        // characterIconImage.sprite = characterIconList[selectedCharacterIndex]; //本来はselectedCharacterIndexではなく変えた人。
         // string statName = currentState.ToString();
         // float newVal = currentState switch {
         //     ControlState.Gravity => settings.gravityScale,
@@ -256,7 +268,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         // if (logText != null) logText.text = $"あなたが{statName}変更:{newVal:F1}";
         
 
-        ApplyLocalStateDelta(increase ? 1 : -1);
+        // ApplyLocalStateDelta(increase ? 1 : -1);
 
         cooldownTimer = MaxCooldown;
         return true;
@@ -425,9 +437,31 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         bool changedBySelf = networkManager != null &&
             !string.IsNullOrWhiteSpace(networkManager.CurrentPlayerId) &&
             string.Equals(networkManager.CurrentPlayerId, sourcePlayerId, System.StringComparison.Ordinal);
+        // switch (currentState)
+        // {
+        //     case ControlState.Gravity: statusIconImage.sprite = statusIconList[0];
+        //     statusLevelText.text = gravityLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+        //     case ControlState.Speed: statusIconImage.sprite = statusIconList[1];
+        //     statusLevelText.text = speedLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+        //     case ControlState.Friction: statusIconImage.sprite = statusIconList[2];
+        //     statusLevelText.text = frictionLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
+        // }
+        // characterIconImage.sprite = characterIconList[sourcePlayerId]; 
+        // string actor = changedBySelf ? "あなた" : sourcePlayerId;
+        // logText.text = $"{actor}の変更を反映 G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
 
-        string actor = changedBySelf ? "あなた" : sourcePlayerId;
-        logText.text = $"{actor}の変更を反映 G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
+
+        // if (logManager != null)        {
+        //     int beforeIndex = (int)currentState;
+        //     int afterIndex = currentState switch
+        //     {
+        //         ControlState.Gravity => gravityLevel,
+        //         ControlState.Speed => speedLevel,
+        //         ControlState.Friction => frictionLevel,
+        //         _ => 1
+        //     };
+        //     logManager.ShowLog(beforeIndex, afterIndex);
+        // }
     }
 
     private void ApplyLocalStateDelta(int diff)
@@ -455,10 +489,22 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
             _ => settings.friction
         };
 
-        if (logText != null)
-        {
-            logText.text = $"あなたが{statName}変更:{newVal:F1}";
-        }
+        // if (logText != null)
+        // {
+        //     logText.text = $"あなたが{statName}変更:{newVal:F1}";
+        // }
+
+        // if (logManager != null)        {
+        //     int beforeIndex = (int)currentState;
+        //     int afterIndex = currentState switch
+        //     {
+        //         ControlState.Gravity => gravityLevel,
+        //         ControlState.Speed => speedLevel,
+        //         ControlState.Friction => frictionLevel,
+        //         _ => 1
+        //     };
+        //     logManager.ShowLog(beforeIndex, afterIndex);
+        // }
     }
 
     private int GetCurrentLevel(ControlState state)
@@ -498,6 +544,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         // statusText.text = $"MODE: {stateName}\n" +
         // //                   $"COOLDOWN: {cdStr}\n" +
         //                   $"G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
+        Debug.Log($"Gravity Level: {gravityLevel}, Speed Level: {speedLevel}, Friction Level: {frictionLevel}");
         switch (gravityLevel)
         {
             case 0: statusValues[0].text = "低"; break;
