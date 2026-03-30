@@ -5,6 +5,11 @@ using Kotatsu.Network;
 
 public class StageManager : MonoBehaviour
 {
+    // PlayerController.characterList の実色
+    // 0:k(黄緑) -> player2(紫), 1:null(シアン) -> player3(オレンジ),
+    // 2:nya(ピンク赤) -> player1(青), 3:pp(紫) -> player4(緑)
+    private static readonly int[] ComplementaryStageMap = { 1, 2, 0, 3 };
+
     [Serializable]
     public struct CharacterStageSet
     {
@@ -77,12 +82,13 @@ public class StageManager : MonoBehaviour
 
     private void GenerateStage()
     {
-        if (characterStages == null || characterStages.Length <= selectedCharacterIndex)
+        int stageSetIndex = ResolveStageSetIndex(selectedCharacterIndex);
+        if (characterStages == null || characterStages.Length <= stageSetIndex)
         {
             return;
         }
 
-        CharacterStageSet currentSet = characterStages[selectedCharacterIndex];
+        CharacterStageSet currentSet = characterStages[stageSetIndex];
         float currentX = 0f;
 
         Instantiate(currentSet.startArea, new Vector3(currentX, 0f, 0f), Quaternion.identity);
@@ -186,5 +192,21 @@ public class StageManager : MonoBehaviour
             list[i] = list[j];
             list[j] = temp;
         }
+    }
+
+    private int ResolveStageSetIndex(int characterIndex)
+    {
+        if (characterStages == null || characterStages.Length == 0)
+        {
+            return 0;
+        }
+
+        int safeIndex = Mathf.Clamp(characterIndex, 0, characterStages.Length - 1);
+        if (safeIndex < ComplementaryStageMap.Length)
+        {
+            return Mathf.Clamp(ComplementaryStageMap[safeIndex], 0, characterStages.Length - 1);
+        }
+
+        return safeIndex;
     }
 }
