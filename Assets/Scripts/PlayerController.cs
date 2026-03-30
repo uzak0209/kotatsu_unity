@@ -451,17 +451,17 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         // logText.text = $"{actor}の変更を反映 G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
 
 
-        // if (logManager != null)        {
-        //     int beforeIndex = (int)currentState;
-        //     int afterIndex = currentState switch
-        //     {
-        //         ControlState.Gravity => gravityLevel,
-        //         ControlState.Speed => speedLevel,
-        //         ControlState.Friction => frictionLevel,
-        //         _ => 1
-        //     };
-        //     logManager.ShowLog(beforeIndex, afterIndex);
-        // }
+        if (logManager != null)        {
+            int beforeIndex = (int)currentState;
+            int afterIndex = currentState switch
+            {
+                ControlState.Gravity => gravityLevel,
+                ControlState.Speed => speedLevel,
+                ControlState.Friction => frictionLevel,
+                _ => 1
+            };
+            logManager.ShowLog(beforeIndex, afterIndex);
+        }
     }
 
     private void ApplyLocalStateDelta(int diff)
