@@ -35,6 +35,7 @@ public class GameFlowManager : MonoBehaviour
 
     private bool countdownStarted;
     private bool subscribedToNetwork;
+    private bool goalSequenceStarted;
 
     private void Start()
     {
@@ -161,7 +162,18 @@ public class GameFlowManager : MonoBehaviour
         }
     }
 
-    public void OnPlayerGoal(string winnerName)
+    public void OnPlayerGoal()
+    {
+        if (goalSequenceStarted)
+        {
+            return;
+        }
+
+        goalSequenceStarted = true;
+        StartCoroutine(HandlePlayerGoalRoutine());
+    }
+
+    private IEnumerator HandlePlayerGoalRoutine()
     {
         if (player != null)
         {
@@ -175,16 +187,66 @@ public class GameFlowManager : MonoBehaviour
 
         if (GText != null)
         {
-            GText.text = $"<color=yellow>GOAL!!</color>\n1st: {winnerName}";
+            GText.text = "<color=yellow>GOAL!!</color>\n順位を確認中...";
         }
 
-        StartCoroutine(ReturnToTitleRoutine());
+        bool shouldRequestFinish = networkManager != null &&
+                                   !string.IsNullOrWhiteSpace(networkManager.CurrentMatchId) &&
+                                   !string.IsNullOrWhiteSpace(networkManager.CurrentPlayerId);
+
+        if (shouldRequestFinish)
+        {
+            bool completed = false;
+            MatchmakingClient.FinishMatchResponse finishResponse = null;
+            string finishError = null;
+
+            networkManager.SubmitFinish(
+                response =>
+                {
+                    finishResponse = response;
+                    completed = true;
+                },
+                error =>
+                {
+                    finishError = error;
+                    completed = true;
+                });
+
+            while (!completed)
+            {
+                yield return null;
+            }
+
+            if (GText != null)
+            {
+                if (finishResponse != null)
+                {
+                    GText.text = $"<color=yellow>GOAL!!</color>\nあなたは {FormatRank(finishResponse.rank)}";
+                }
+                else
+                {
+                    Debug.LogWarning($"Failed to fetch finish rank: {finishError}");
+                    GText.text = "<color=yellow>GOAL!!</color>\n順位を取得できませんでした";
+                }
+            }
+        }
+        else if (GText != null)
+        {
+            GText.text = "<color=yellow>GOAL!!</color>\nあなたは 1位";
+        }
+
+        yield return ReturnToTitleRoutine();
     }
 
     private IEnumerator ReturnToTitleRoutine()
     {
         yield return new WaitForSeconds(2f);
         Initiate.Fade("Title", Color.black, 2f);
+    }
+
+    private static string FormatRank(int rank)
+    {
+        return rank > 0 ? $"{rank}位" : "順位不明";
     }
 
     private void SyncCharacterSelection()

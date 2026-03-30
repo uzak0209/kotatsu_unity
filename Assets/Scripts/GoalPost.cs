@@ -16,7 +16,7 @@ public class GoalPost : MonoBehaviour
             
             if (flowManager != null)
             {
-                flowManager.OnPlayerGoal("YOU");
+                flowManager.OnPlayerGoal();
             }
             else
             {
