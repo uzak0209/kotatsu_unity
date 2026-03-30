@@ -1284,7 +1284,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::manual
   canvasToEnable: {fileID: 550621317}
   canvasToDisable: {fileID: 1523374717}
-  firstButton: {fileID: 1590089789}
+  firstButton: {fileID: 1513171805}
   buttonSE: {fileID: 8300000, guid: d12f04d8cab41ca4c85b943f7208c34c, type: 3}
   audioSource: {fileID: 1572726027}
 --- !u!1 &1101257592
@@ -2091,6 +2091,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1572726028}
   - component: {fileID: 1572726027}
+  - component: {fileID: 1572726029}
   m_Layer: 0
   m_Name: se
   m_TagString: Untagged
@@ -2210,6 +2211,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1572726029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1572726026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9e9d2045efea3f42bea17c977f1d4c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Hidecommand
+  canvasToEnable: {fileID: 1523374717}
+  canvasToDisable: {fileID: 550621317}
+  firstButton: {fileID: 1077643073}
+  buttonSE: {fileID: 8300000, guid: d12f04d8cab41ca4c85b943f7208c34c, type: 3}
+  audioSource: {fileID: 1572726027}
 --- !u!1 &1590089789
 GameObject:
   m_ObjectHideFlags: 0
