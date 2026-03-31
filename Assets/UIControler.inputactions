@@ -50,17 +50,6 @@
                 },
                 {
                     "name": "",
-                    "id": "3f5087fb-8cb8-4dc0-a1dd-b8902fa2ccdb",
-                    "path": "<Keyboard>/numpadEnter",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Submit",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "824eb8fd-97fb-401c-ad59-c8d467f168ba",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
