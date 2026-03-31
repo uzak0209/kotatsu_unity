@@ -1,12 +1,10 @@
 fileFormatVersion: 2
-
-guid: 728ba7f2fdd30534a8f96de826b8af18
-
+guid: 4b02bd68eca27aa4ea25f4bb94cd5e2d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8456300275823373207
-    second: "\u7121\u984C7_20260331105355_0"
+      213: -8283594084244734429
+    second: player2_background_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -48,9 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-
-  spriteMode: 1
-
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -100,26 +96,11 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\u7121\u984C7_20260331105355_0"
+      name: player2_background_0
       rect:
         serializedVersion: 2
         x: 0
@@ -134,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9649289d3bf25aa80800000000000000
-      internalID: -8456300275823373207
+      spriteID: 32eb0199113ca0d80800000000000000
+      internalID: -8283594084244734429
       vertices: []
       indices: 
       edges: []
@@ -144,9 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-
-    spriteID: 5e97eb03825dee720800000000000000
-
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -156,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "\u7121\u984C7_20260331105355_0": -8456300275823373207
+      player2_background_0: -8283594084244734429
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
