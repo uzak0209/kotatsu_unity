@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: LocationSpriteDatabase
   m_EditorClassIdentifier: 
   playerSprites:
-  - start: {fileID: -1698519196158067260, guid: 49b3483a7aa97e449b4ad44c7408d13d, type: 3}
-    home: {fileID: -7459275293333187874, guid: a5166bc5c6d25354a94f27675f4dd3e6, type: 3}
-    straight: {fileID: 3472084982308350718, guid: 64eb1c6010971be4c85609638e1dcab8, type: 3}
-    sasuke: {fileID: 7136486262788803220, guid: 1da539374dcd35c46b4dc0d73c0b9991, type: 3}
-    animal: {fileID: 8616031461080376332, guid: 3cf47fd61425af9499cdc2afc82e9a17, type: 3}
-    mountain: {fileID: -123154218290256204, guid: 423ecd19943410b4aa68eb611833223e, type: 3}
+  - start: {fileID: -6518809626523721372, guid: e165e4056a7cd4c43ba769dae667f556, type: 3}
+    home: {fileID: 8153784259269080692, guid: cfb155841f6790a44af949d41e42f082, type: 3}
+    straight: {fileID: -6366681475300202698, guid: 831045ddfa18c584c84ab267765c7fcc, type: 3}
+    sasuke: {fileID: 550527408463578200, guid: 145093acc9eb86548b65f2fcab57c55a, type: 3}
+    animal: {fileID: 4753634633142951354, guid: a0a4ef81a69e14a45816b321697a332f, type: 3}
+    mountain: {fileID: -4450554219635739809, guid: 2bcb346807bead04ab9ba77bf1f22042, type: 3}
     gameBackground: {fileID: 6154091800315098378, guid: 7c8a8475762e8c044b1c2add0c68c2a5, type: 3}
   - start: {fileID: 5146435404731134691, guid: b2edc52fd8061e84d8bf093f8102163f, type: 3}
     home: {fileID: 8785003807638960311, guid: a42d0da3f7b40c94babe3531278ad70e, type: 3}
@@ -27,12 +27,12 @@ MonoBehaviour:
     animal: {fileID: 6209331782847659093, guid: 6242599c8b6b6af4395c7e4e4a6906ac, type: 3}
     mountain: {fileID: 8329235709624121891, guid: e862e6176ff1d4a4bb5845425d889b1a, type: 3}
     gameBackground: {fileID: -8283594084244734429, guid: ee3549ff24508ec4db16607b692f9c97, type: 3}
-  - start: {fileID: -6518809626523721372, guid: e165e4056a7cd4c43ba769dae667f556, type: 3}
-    home: {fileID: 8153784259269080692, guid: cfb155841f6790a44af949d41e42f082, type: 3}
-    straight: {fileID: -6366681475300202698, guid: 831045ddfa18c584c84ab267765c7fcc, type: 3}
-    sasuke: {fileID: 550527408463578200, guid: 145093acc9eb86548b65f2fcab57c55a, type: 3}
-    animal: {fileID: 4753634633142951354, guid: a0a4ef81a69e14a45816b321697a332f, type: 3}
-    mountain: {fileID: -4450554219635739809, guid: 2bcb346807bead04ab9ba77bf1f22042, type: 3}
+  - start: {fileID: -1698519196158067260, guid: 49b3483a7aa97e449b4ad44c7408d13d, type: 3}
+    home: {fileID: -7459275293333187874, guid: a5166bc5c6d25354a94f27675f4dd3e6, type: 3}
+    straight: {fileID: 3472084982308350718, guid: 64eb1c6010971be4c85609638e1dcab8, type: 3}
+    sasuke: {fileID: 7136486262788803220, guid: 1da539374dcd35c46b4dc0d73c0b9991, type: 3}
+    animal: {fileID: 8616031461080376332, guid: 3cf47fd61425af9499cdc2afc82e9a17, type: 3}
+    mountain: {fileID: -123154218290256204, guid: 423ecd19943410b4aa68eb611833223e, type: 3}
     gameBackground: {fileID: 271201340562874666, guid: 149205a3d40a02e44bc8d6a116ce1081, type: 3}
   - start: {fileID: 445554208349415294, guid: 961c18d97513e534fab04bc2ea8a5870, type: 3}
     home: {fileID: 4361591542890020991, guid: 5e7f8d824ed980a41a5c587e08cde7ef, type: 3}
