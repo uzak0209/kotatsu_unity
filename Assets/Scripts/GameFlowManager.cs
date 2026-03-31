@@ -55,6 +55,7 @@ public class GameFlowManager : MonoBehaviour
         if (GText != null)
         {
             GText.text = string.Empty;
+            GText.gameObject.SetActive(false);
         }
 
         if (networkManager != null && networkManager.IsConnected && !networkManager.HasMatchConfiguration)
@@ -187,6 +188,7 @@ public class GameFlowManager : MonoBehaviour
 
         if (GText != null)
         {
+            GText.gameObject.SetActive(true);
             GText.text = "<color=yellow>GOAL!!</color>\n順位を確認中...";
         }
 

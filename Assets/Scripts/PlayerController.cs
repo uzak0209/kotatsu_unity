@@ -213,6 +213,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
 
         // 現在のレベルが限界値なら何もしない
         int currentLevel = GetCurrentLevel(currentState);
+        int diff = increase ? 1 : -1;
 
         if (increase && currentLevel >= maxLevel) return false;
         if (!increase && currentLevel <= 0) return false;
@@ -221,42 +222,23 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         if (useAuthoritativeNetwork)
         {
             SendParamChangeOverNetwork(increase);
+            ApplyCooldownFeedback();
+            ShowStateChangeLog(currentState, Mathf.Clamp(currentLevel + diff, 0, maxLevel));
             return true;
         }
 
         if (cooldownTimer > 0f) return false;
 
         // ローカルのレベルを更新
-        int diff = increase ? 1 : -1;
         switch (currentState)
         {
             case ControlState.Gravity: gravityLevel += diff; break;
             case ControlState.Speed: speedLevel += diff; break;
             case ControlState.Friction: frictionLevel += diff; break;
         }
-        gaugeController.StartGauge(MaxCooldown);
         SyncSettingsWithLevels();
-        
-        // switch (currentState)
-        // {
-        //     case ControlState.Gravity: statusIconImage.sprite = statusIconList[0];
-        //     statusLevelText.text = gravityLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
-        //     case ControlState.Speed: statusIconImage.sprite = statusIconList[1];
-        //     statusLevelText.text = speedLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
-        //     case ControlState.Friction: statusIconImage.sprite = statusIconList[2];
-        //     statusLevelText.text = frictionLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
-        // }
-        if (logManager != null)        {
-            int beforeIndex = (int)currentState;
-            int afterIndex = currentState switch
-            {
-                ControlState.Gravity => gravityLevel,
-                ControlState.Speed => speedLevel,
-                ControlState.Friction => frictionLevel,
-                _ => 1
-            };
-            logManager.ShowLog(beforeIndex, afterIndex);
-        }
+        ApplyCooldownFeedback();
+        ShowStateChangeLog(currentState, GetCurrentLevel(currentState));
         // characterIconImage.sprite = characterIconList[selectedCharacterIndex]; //本来はselectedCharacterIndexではなく変えた人。
         // string statName = currentState.ToString();
         // float newVal = currentState switch {
@@ -269,8 +251,6 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         
 
         // ApplyLocalStateDelta(increase ? 1 : -1);
-
-        cooldownTimer = MaxCooldown;
         return true;
     }
 
@@ -429,7 +409,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         SyncSettingsWithLevels();
 
         bool changed = previousGravity != gravityLevel || previousFriction != frictionLevel || previousSpeed != speedLevel;
-        if (!changed || logText == null || string.IsNullOrWhiteSpace(sourcePlayerId))
+        if (!changed)
         {
             return;
         }
@@ -437,31 +417,59 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         bool changedBySelf = networkManager != null &&
             !string.IsNullOrWhiteSpace(networkManager.CurrentPlayerId) &&
             string.Equals(networkManager.CurrentPlayerId, sourcePlayerId, System.StringComparison.Ordinal);
-        // switch (currentState)
-        // {
-        //     case ControlState.Gravity: statusIconImage.sprite = statusIconList[0];
-        //     statusLevelText.text = gravityLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
-        //     case ControlState.Speed: statusIconImage.sprite = statusIconList[1];
-        //     statusLevelText.text = speedLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
-        //     case ControlState.Friction: statusIconImage.sprite = statusIconList[2];
-        //     statusLevelText.text = frictionLevel switch { 0 => "低", 1 => "中", 2 => "高", _ => "" }; break;
-        // }
-        // characterIconImage.sprite = characterIconList[sourcePlayerId]; 
-        // string actor = changedBySelf ? "あなた" : sourcePlayerId;
-        // logText.text = $"{actor}の変更を反映 G:{settings.gravityScale:F1} / S:{settings.moveSpeed:F1} / F:{settings.friction:F1}";
 
-
-        if (logManager != null)        {
-            int beforeIndex = (int)currentState;
-            int afterIndex = currentState switch
-            {
-                ControlState.Gravity => gravityLevel,
-                ControlState.Speed => speedLevel,
-                ControlState.Friction => frictionLevel,
-                _ => 1
-            };
-            logManager.ShowLog(beforeIndex, afterIndex);
+        if (changedBySelf || string.IsNullOrWhiteSpace(sourcePlayerId))
+        {
+            return;
         }
+
+        if (TryResolveChangedState(previousGravity, previousFriction, previousSpeed, out ControlState changedState))
+        {
+            ShowStateChangeLog(changedState, GetCurrentLevel(changedState));
+        }
+    }
+
+    private void ApplyCooldownFeedback()
+    {
+        cooldownTimer = MaxCooldown;
+        if (gaugeController != null)
+        {
+            gaugeController.StartGauge(MaxCooldown);
+        }
+    }
+
+    private void ShowStateChangeLog(ControlState state, int level)
+    {
+        if (logManager == null)
+        {
+            return;
+        }
+
+        logManager.ShowLog((int)state, level);
+    }
+
+    private bool TryResolveChangedState(int previousGravity, int previousFriction, int previousSpeed, out ControlState changedState)
+    {
+        if (previousGravity != gravityLevel)
+        {
+            changedState = ControlState.Gravity;
+            return true;
+        }
+
+        if (previousSpeed != speedLevel)
+        {
+            changedState = ControlState.Speed;
+            return true;
+        }
+
+        if (previousFriction != frictionLevel)
+        {
+            changedState = ControlState.Friction;
+            return true;
+        }
+
+        changedState = ControlState.Gravity;
+        return false;
     }
 
     private void ApplyLocalStateDelta(int diff)
