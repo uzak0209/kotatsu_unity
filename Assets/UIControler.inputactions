@@ -50,17 +50,6 @@
                 },
                 {
                     "name": "",
-                    "id": "5e6292e3-89ec-4ce9-bce1-a13c00c4d6e7",
-                    "path": "<Keyboard>/enter",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Submit",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "3f5087fb-8cb8-4dc0-a1dd-b8902fa2ccdb",
                     "path": "<Keyboard>/numpadEnter",
                     "interactions": "",
