@@ -219,6 +219,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         if (!increase && currentLevel <= 0) return false;
 
         bool useAuthoritativeNetwork = networkManager != null && networkManager.IsConnected;
+        if (cooldownTimer > 0f) return false;
         if (useAuthoritativeNetwork)
         {
             SendParamChangeOverNetwork(increase);
@@ -227,7 +228,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
             return true;
         }
 
-        if (cooldownTimer > 0f) return false;
+        
 
         // ローカルのレベルを更新
         switch (currentState)
