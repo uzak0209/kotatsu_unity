@@ -1670,7 +1670,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c89614923e8e3454480d1c723991c3ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::scenechange
-  nextSceneName: Test
+  nextSceneName: (Test)
   fadeColor: {r: 0, g: 0, b: 0, a: 1}
   fadeDuration: 2
   buttonSE: {fileID: 8300000, guid: d12f04d8cab41ca4c85b943f7208c34c, type: 3}
