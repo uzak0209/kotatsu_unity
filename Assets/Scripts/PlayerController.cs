@@ -225,7 +225,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
             SendParamChangeOverNetwork(increase);
             ApplyCooldownFeedback();
             ShowStateChangeLog(currentState, Mathf.Clamp(currentLevel + diff, 0, maxLevel));
-            return true;
+            // return true;
         }
 
         
@@ -239,7 +239,7 @@ public class PlayerController : MonoBehaviour, PlayerControls.IPlayerActions
         }
         SyncSettingsWithLevels();
         ApplyCooldownFeedback();
-        ShowStateChangeLog(currentState, GetCurrentLevel(currentState));
+        // ShowStateChangeLog(currentState, GetCurrentLevel(currentState));
         // characterIconImage.sprite = characterIconList[selectedCharacterIndex]; //本来はselectedCharacterIndexではなく変えた人。
         // string statName = currentState.ToString();
         // float newVal = currentState switch {
