@@ -9,6 +9,18 @@ namespace Kotatsu.Network
     {
         private const string OverlayCanvasName = "OpponentHudCanvas";
         private const string TrackerPanelName = "OpponentStageTracker";
+        private const float OverlayScaleFactor = 1.6f;
+        private const float PanelWidth = 420f;
+        private const int PanelPadding = 14;
+        private const float PanelSpacing = 10f;
+        private const float TrackWidth = 380f;
+        private const float TrackHeight = 58f;
+        private const float TrackOutlineOffset = 2f;
+        private const float TrackHorizontalPadding = 22f;
+        private const float RouteStopBaseSize = 22f;
+        private const float RouteStopCurrentSize = 30f;
+        private const float RouteIconBaseSize = 28f;
+        private const float RouteIconCurrentSize = 40f;
         private static readonly int[] CharacterToLocationColorMap = { 1, 2, 0, 3 };
 
         private class PlayerTrackerRow
@@ -146,7 +158,7 @@ namespace Kotatsu.Network
                 statusText = panelRoot.Find("Status")?.GetComponent<TextMeshProUGUI>();
                 if (titleText == null)
                 {
-                    titleText = CreateText("Header", panelRoot, 24f, FontStyles.Bold, textColor);
+                    titleText = CreateText("Header", panelRoot, 30f, FontStyles.Bold, textColor);
                     titleText.alignment = TextAlignmentOptions.Left;
                 }
                 titleText.text = string.Empty;
@@ -154,7 +166,7 @@ namespace Kotatsu.Network
 
                 if (statusText == null)
                 {
-                    statusText = CreateText("Status", panelRoot, 16f, FontStyles.Normal, subTextColor);
+                    statusText = CreateText("Status", panelRoot, 20f, FontStyles.Normal, subTextColor);
                     statusText.alignment = TextAlignmentOptions.Left;
                 }
                 statusText.text = "Loading map...";
@@ -167,15 +179,15 @@ namespace Kotatsu.Network
             panelRoot.anchorMin = new Vector2(0f, 1f);
             panelRoot.anchorMax = new Vector2(0f, 1f);
             panelRoot.pivot = new Vector2(0f, 1f);
-            panelRoot.anchoredPosition = new Vector2(18f, -18f);
-            panelRoot.sizeDelta = new Vector2(312f, 0f);
+            panelRoot.anchoredPosition = new Vector2(24f, -24f);
+            panelRoot.sizeDelta = new Vector2(PanelWidth, 0f);
 
             Image bg = panelGo.GetComponent<Image>();
             bg.color = new Color(0f, 0f, 0f, 0.22f);
 
             VerticalLayoutGroup layout = panelGo.GetComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(8, 8, 8, 8);
-            layout.spacing = 6f;
+            layout.padding = new RectOffset(PanelPadding, PanelPadding, PanelPadding, PanelPadding);
+            layout.spacing = PanelSpacing;
             layout.childControlWidth = true;
             layout.childControlHeight = false;
             layout.childForceExpandHeight = false;
@@ -185,12 +197,12 @@ namespace Kotatsu.Network
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 
-            titleText = CreateText("Header", panelRoot, 24f, FontStyles.Bold, textColor);
+            titleText = CreateText("Header", panelRoot, 30f, FontStyles.Bold, textColor);
             titleText.text = string.Empty;
             titleText.alignment = TextAlignmentOptions.Left;
             titleText.gameObject.SetActive(false);
 
-            statusText = CreateText("Status", panelRoot, 13f, FontStyles.Normal, subTextColor);
+            statusText = CreateText("Status", panelRoot, 20f, FontStyles.Normal, subTextColor);
             statusText.text = "Loading map...";
             statusText.alignment = TextAlignmentOptions.Left;
         }
@@ -221,7 +233,7 @@ namespace Kotatsu.Network
             CanvasScaler scaler = canvasGo.GetComponent<CanvasScaler>();
             if (scaler == null) scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
-            scaler.scaleFactor = 1f;
+            scaler.scaleFactor = OverlayScaleFactor;
 
             if (canvasGo.GetComponent<GraphicRaycaster>() == null)
             {
@@ -389,7 +401,7 @@ namespace Kotatsu.Network
             GameObject trackGo = new GameObject("Track", typeof(RectTransform), typeof(Image), typeof(Outline), typeof(LayoutElement));
             trackGo.transform.SetParent(rowRect, false);
             RectTransform trackRect = trackGo.GetComponent<RectTransform>();
-            trackRect.sizeDelta = new Vector2(280f, 40f);
+            trackRect.sizeDelta = new Vector2(TrackWidth, TrackHeight);
 
             Image trackImage = trackGo.GetComponent<Image>();
             trackImage.color = trackColor;
@@ -397,13 +409,13 @@ namespace Kotatsu.Network
 
             Outline outline = trackGo.GetComponent<Outline>();
             outline.effectColor = trackOutlineColor;
-            outline.effectDistance = new Vector2(2f, -2f);
+            outline.effectDistance = new Vector2(TrackOutlineOffset, -TrackOutlineOffset);
             outline.useGraphicAlpha = true;
 
             LayoutElement trackLayout = trackGo.GetComponent<LayoutElement>();
-            trackLayout.preferredWidth = 280f;
-            trackLayout.preferredHeight = 40f;
-            trackLayout.minHeight = 40f;
+            trackLayout.preferredWidth = TrackWidth;
+            trackLayout.preferredHeight = TrackHeight;
+            trackLayout.minHeight = TrackHeight;
 
             PlayerTrackerRow row = new PlayerTrackerRow
             {
@@ -503,7 +515,7 @@ namespace Kotatsu.Network
                 stopRect.anchorMin = new Vector2(0.5f, 0.5f);
                 stopRect.anchorMax = new Vector2(0.5f, 0.5f);
                 stopRect.pivot = new Vector2(0.5f, 0.5f);
-                stopRect.sizeDelta = new Vector2(14f, 14f);
+                stopRect.sizeDelta = new Vector2(RouteStopBaseSize, RouteStopBaseSize);
 
                 Image slotImage = stopGo.GetComponent<Image>();
                 slotImage.color = checkpointColor;
@@ -520,7 +532,7 @@ namespace Kotatsu.Network
                 iconRect.anchorMin = new Vector2(0.5f, 0.5f);
                 iconRect.anchorMax = new Vector2(0.5f, 0.5f);
                 iconRect.pivot = new Vector2(0.5f, 0.5f);
-                iconRect.sizeDelta = new Vector2(20f, 20f);
+                iconRect.sizeDelta = new Vector2(RouteIconBaseSize, RouteIconBaseSize);
 
                 Image iconImage = iconGo.GetComponent<Image>();
                 iconImage.preserveAspect = true;
@@ -566,7 +578,9 @@ namespace Kotatsu.Network
                         ? new Color(reachedSlotColor.r, reachedSlotColor.g, reachedSlotColor.b, 0.95f)
                         : new Color(reachedSlotColor.r, reachedSlotColor.g, reachedSlotColor.b, 0.45f);
                 routeStop.slotOutline.effectColor = isCurrent ? themeColor : new Color(1f, 1f, 1f, 0f);
-                routeStop.root.sizeDelta = isCurrent ? new Vector2(22f, 22f) : new Vector2(16f, 16f);
+                routeStop.root.sizeDelta = isCurrent
+                    ? new Vector2(RouteStopCurrentSize, RouteStopCurrentSize)
+                    : new Vector2(RouteStopBaseSize, RouteStopBaseSize);
 
                 routeStop.iconImage.sprite = sprite;
                 routeStop.iconImage.enabled = sprite != null;
@@ -575,7 +589,9 @@ namespace Kotatsu.Network
                     : isReached
                         ? new Color(1f, 1f, 1f, 0.94f)
                         : new Color(1f, 1f, 1f, 0.50f);
-                routeStop.iconImage.rectTransform.sizeDelta = isCurrent ? new Vector2(28f, 28f) : new Vector2(20f, 20f);
+                routeStop.iconImage.rectTransform.sizeDelta = isCurrent
+                    ? new Vector2(RouteIconCurrentSize, RouteIconCurrentSize)
+                    : new Vector2(RouteIconBaseSize, RouteIconBaseSize);
 
                 if (isCurrent)
                 {
@@ -645,9 +661,8 @@ namespace Kotatsu.Network
         private static float CalculateTrackX(RectTransform trackRect, int routeStopCount, int stopIndex)
         {
             float trackWidth = Mathf.Max(trackRect.rect.width, 0f);
-            float horizontalPadding = 16f;
-            float usableWidth = Mathf.Max(trackWidth - (horizontalPadding * 2f), 0f);
-            float leftEdge = -trackWidth * 0.5f + horizontalPadding;
+            float usableWidth = Mathf.Max(trackWidth - (TrackHorizontalPadding * 2f), 0f);
+            float leftEdge = -trackWidth * 0.5f + TrackHorizontalPadding;
 
             if (routeStopCount <= 1)
             {
