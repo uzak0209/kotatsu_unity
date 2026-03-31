@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,43 +8,117 @@ namespace Kotatsu.Network
     public class OpponentPositionOverlay : MonoBehaviour
     {
         private const string OverlayCanvasName = "OpponentHudCanvas";
-        private const string OverlayTextName = "OpponentPositionText";
+        private const string TrackerPanelName = "OpponentStageTracker";
+        private const float OverlayScaleFactor = 1.6f;
+        private const float PanelWidth = 420f;
+        private const int PanelPadding = 14;
+        private const float PanelSpacing = 10f;
+        private const float TrackWidth = 380f;
+        private const float TrackHeight = 58f;
+        private const float TrackOutlineOffset = 2f;
+        private const float TrackHorizontalPadding = 22f;
+        private const float RouteStopBaseSize = 22f;
+        private const float RouteStopCurrentSize = 30f;
+        private const float RouteIconBaseSize = 28f;
+        private const float RouteIconCurrentSize = 40f;
+        private static readonly int[] CharacterToLocationColorMap = { 1, 2, 0, 3 };
+
+        private class PlayerTrackerRow
+        {
+            public string playerId;
+            public RectTransform root;
+            public Image background;
+            public RectTransform trackRect;
+            public TextMeshProUGUI headerText;
+            public TextMeshProUGUI stageText;
+            public readonly List<RouteStopVisual> routeStops = new List<RouteStopVisual>();
+        }
+
+        private class RouteStopVisual
+        {
+            public RectTransform root;
+            public Image slotImage;
+            public Outline slotOutline;
+            public Image iconImage;
+        }
+
+        private struct StageLocationPresentation
+        {
+            public bool hasSprite;
+            public LocationVisualKind visualKind;
+            public string label;
+        }
+
+        private static readonly StageLocationPresentation FixedStartPresentation = new StageLocationPresentation
+        {
+            hasSprite = true,
+            visualKind = LocationVisualKind.Start,
+            label = "Kamakura"
+        };
+
+        private static readonly StageLocationPresentation FixedGoalPresentation = new StageLocationPresentation
+        {
+            hasSprite = true,
+            visualKind = LocationVisualKind.Home,
+            label = "Home"
+        };
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
         {
             if (FindAnyObjectByType<OpponentPositionOverlay>() != null) return;
-            if (FindAnyObjectByType<PlayerController>() == null) return;
-            var go = new GameObject("OpponentPositionOverlay");
+
+            GameObject go = new GameObject("OpponentPositionOverlay");
             go.AddComponent<OpponentPositionOverlay>();
         }
 
         [SerializeField] private NetworkManager networkManager;
-        [SerializeField] private Color labelColor = new Color(0.95f, 0.95f, 0.95f, 1f);
-        [SerializeField] private Color valueColor = new Color(0.55f, 0.95f, 0.95f, 1f);
-        [SerializeField] private Color selfColor = new Color(1f, 0.88f, 0.58f, 1f);
+        [SerializeField] private PlayerController localPlayerController;
+        [SerializeField] private LocationSpriteDatabase locationSpriteDatabase;
+        [SerializeField] private Color panelBackground = new Color(0.08f, 0.10f, 0.15f, 0.76f);
+        [SerializeField] private Color selfPanelBackground = new Color(0.16f, 0.20f, 0.28f, 0.92f);
+        [SerializeField] private Color trackColor = new Color(0.99f, 0.73f, 0.45f, 0.96f);
+        [SerializeField] private Color trackOutlineColor = new Color(0.95f, 0.46f, 0.44f, 0.95f);
+        [SerializeField] private Color checkpointColor = new Color(1f, 0.94f, 0.84f, 0.90f);
+        [SerializeField] private Color currentSlotColor = new Color(1f, 0.98f, 0.86f, 1f);
+        [SerializeField] private Color currentSlotOutlineColor = new Color(1f, 1f, 1f, 0.95f);
+        [SerializeField] private Color textColor = new Color(0.96f, 0.97f, 1f, 1f);
+        [SerializeField] private Color subTextColor = new Color(0.80f, 0.86f, 0.98f, 1f);
 
-        private readonly Dictionary<string, Vector2> latestPositions = new Dictionary<string, Vector2>();
-        private TextMeshProUGUI hudText;
+        private readonly Dictionary<string, PlayerTrackerRow> rowsByPlayerId = new Dictionary<string, PlayerTrackerRow>();
+        private RectTransform panelRoot;
+        private TextMeshProUGUI titleText;
+        private TextMeshProUGUI statusText;
         private bool subscribed;
         private float reconnectTimer;
+        private float refreshTimer;
 
         private void Awake()
         {
-            if (FindAnyObjectByType<PlayerController>() == null)
+            DontDestroyOnLoad(gameObject);
+
+            if (locationSpriteDatabase == null)
             {
-                Destroy(gameObject);
-                return;
+                locationSpriteDatabase = Resources.Load<LocationSpriteDatabase>("LocationSpriteDatabase");
             }
 
-            EnsureHudText();
+            if (localPlayerController == null)
+            {
+                localPlayerController = FindFirstObjectByType<PlayerController>();
+            }
+
+            EnsurePanel();
             TryBindNetworkManager();
-            RefreshText();
+            RefreshTracker();
         }
 
         private void Update()
         {
-            // Scene start order differs per scene; retry binding gently.
+            if (panelRoot == null || titleText == null || statusText == null)
+            {
+                EnsurePanel();
+            }
+
             if (networkManager == null || !subscribed)
             {
                 reconnectTimer += Time.deltaTime;
@@ -53,8 +126,19 @@ namespace Kotatsu.Network
                 {
                     reconnectTimer = 0f;
                     TryBindNetworkManager();
-                    RefreshText();
                 }
+            }
+
+            if (localPlayerController == null)
+            {
+                localPlayerController = FindFirstObjectByType<PlayerController>();
+            }
+
+            refreshTimer += Time.deltaTime;
+            if (refreshTimer >= 0.25f)
+            {
+                refreshTimer = 0f;
+                RefreshTracker();
             }
         }
 
@@ -63,49 +147,93 @@ namespace Kotatsu.Network
             Unsubscribe();
         }
 
-        private void EnsureHudText()
+        private void EnsurePanel()
         {
             Canvas canvas = GetOrCreateOverlayCanvas();
-
-            Transform existing = canvas.transform.Find(OverlayTextName);
+            Transform existing = canvas.transform.Find(TrackerPanelName);
             if (existing != null)
             {
-                hudText = existing.GetComponent<TextMeshProUGUI>();
-                ConfigureHudText(hudText);
+                panelRoot = existing as RectTransform;
+                titleText = panelRoot.Find("Header")?.GetComponent<TextMeshProUGUI>();
+                statusText = panelRoot.Find("Status")?.GetComponent<TextMeshProUGUI>();
+                if (titleText == null)
+                {
+                    titleText = CreateText("Header", panelRoot, 30f, FontStyles.Bold, textColor);
+                    titleText.alignment = TextAlignmentOptions.Left;
+                }
+                titleText.text = string.Empty;
+                titleText.gameObject.SetActive(false);
+
+                if (statusText == null)
+                {
+                    statusText = CreateText("Status", panelRoot, 20f, FontStyles.Normal, subTextColor);
+                    statusText.alignment = TextAlignmentOptions.Left;
+                }
+                statusText.text = "Loading map...";
                 return;
             }
 
-            var textGo = new GameObject(OverlayTextName);
-            textGo.transform.SetParent(canvas.transform, false);
-            hudText = textGo.AddComponent<TextMeshProUGUI>();
-            ConfigureHudText(hudText);
+            GameObject panelGo = new GameObject(TrackerPanelName, typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            panelGo.transform.SetParent(canvas.transform, false);
+            panelRoot = panelGo.GetComponent<RectTransform>();
+            panelRoot.anchorMin = new Vector2(0f, 1f);
+            panelRoot.anchorMax = new Vector2(0f, 1f);
+            panelRoot.pivot = new Vector2(0f, 1f);
+            panelRoot.anchoredPosition = new Vector2(24f, -24f);
+            panelRoot.sizeDelta = new Vector2(PanelWidth, 0f);
+
+            Image bg = panelGo.GetComponent<Image>();
+            bg.color = new Color(0f, 0f, 0f, 0.22f);
+
+            VerticalLayoutGroup layout = panelGo.GetComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(PanelPadding, PanelPadding, PanelPadding, PanelPadding);
+            layout.spacing = PanelSpacing;
+            layout.childControlWidth = true;
+            layout.childControlHeight = false;
+            layout.childForceExpandHeight = false;
+            layout.childForceExpandWidth = true;
+
+            ContentSizeFitter fitter = panelGo.GetComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+            titleText = CreateText("Header", panelRoot, 30f, FontStyles.Bold, textColor);
+            titleText.text = string.Empty;
+            titleText.alignment = TextAlignmentOptions.Left;
+            titleText.gameObject.SetActive(false);
+
+            statusText = CreateText("Status", panelRoot, 20f, FontStyles.Normal, subTextColor);
+            statusText.text = "Loading map...";
+            statusText.alignment = TextAlignmentOptions.Left;
         }
 
         private static Canvas GetOrCreateOverlayCanvas()
         {
-            var canvasGo = GameObject.Find(OverlayCanvasName);
+            GameObject canvasGo = GameObject.Find(OverlayCanvasName);
             if (canvasGo == null)
             {
                 canvasGo = new GameObject(OverlayCanvasName);
             }
 
-            var canvas = canvasGo.GetComponent<Canvas>();
+            Canvas canvas = canvasGo.GetComponent<Canvas>();
             if (canvas == null) canvas = canvasGo.AddComponent<Canvas>();
+
             Camera worldCam = Camera.main;
             if (worldCam == null)
             {
                 worldCam = FindAnyObjectByType<Camera>();
             }
+
             canvas.renderMode = worldCam != null ? RenderMode.ScreenSpaceCamera : RenderMode.ScreenSpaceOverlay;
             canvas.worldCamera = worldCam;
             canvas.planeDistance = 100f;
             canvas.overrideSorting = true;
             canvas.sortingOrder = 32000;
 
-            var scaler = canvasGo.GetComponent<CanvasScaler>();
+            CanvasScaler scaler = canvasGo.GetComponent<CanvasScaler>();
             if (scaler == null) scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
-            scaler.scaleFactor = 1f;
+            scaler.scaleFactor = OverlayScaleFactor;
 
             if (canvasGo.GetComponent<GraphicRaycaster>() == null)
             {
@@ -115,37 +243,6 @@ namespace Kotatsu.Network
             return canvas;
         }
 
-        private void ConfigureHudText(TextMeshProUGUI text)
-        {
-            if (text == null) return;
-
-            text.font = ResolveFontAsset();
-            if (text.font != null)
-            {
-                text.fontSharedMaterial = text.font.material;
-            }
-            text.fontSize = 22f;
-            text.color = labelColor;
-            text.alignment = TextAlignmentOptions.TopLeft;
-            text.raycastTarget = false;
-            text.richText = true;
-            text.textWrappingMode = TextWrappingModes.NoWrap;
-            text.text = "";
-
-            RectTransform rt = text.rectTransform;
-            rt.anchorMin = new Vector2(0f, 1f);
-            rt.anchorMax = new Vector2(0f, 1f);
-            rt.pivot = new Vector2(0f, 1f);
-            rt.anchoredPosition = new Vector2(30f, -170f);
-            rt.sizeDelta = new Vector2(560f, 220f);
-        }
-
-        private static TMP_FontAsset ResolveFontAsset()
-        {
-            if (TMP_Settings.defaultFontAsset != null) return TMP_Settings.defaultFontAsset;
-            return Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
-        }
-
         private void TryBindNetworkManager()
         {
             if (networkManager == null)
@@ -153,89 +250,496 @@ namespace Kotatsu.Network
                 networkManager = FindAnyObjectByType<NetworkManager>();
             }
 
-            if (networkManager == null || subscribed) return;
+            if (networkManager == null || subscribed)
+            {
+                return;
+            }
 
-            networkManager.OnGameConnected += OnGameConnected;
-            networkManager.OnGameDisconnected += OnGameDisconnected;
+            networkManager.OnGameConnected += RefreshTracker;
+            networkManager.OnGameDisconnected += RefreshTracker;
             networkManager.OnMatchJoined += OnMatchJoined;
-            networkManager.OnPlayerPositionUpdated += OnPlayerPositionUpdated;
+            networkManager.OnMatchConfigurationUpdated += RefreshTracker;
+            networkManager.OnPlayerStageProgressUpdated += OnPlayerStageProgressUpdated;
             subscribed = true;
         }
 
         private void Unsubscribe()
         {
-            if (!subscribed || networkManager == null) return;
+            if (!subscribed || networkManager == null)
+            {
+                return;
+            }
 
-            networkManager.OnGameConnected -= OnGameConnected;
-            networkManager.OnGameDisconnected -= OnGameDisconnected;
+            networkManager.OnGameConnected -= RefreshTracker;
+            networkManager.OnGameDisconnected -= RefreshTracker;
             networkManager.OnMatchJoined -= OnMatchJoined;
-            networkManager.OnPlayerPositionUpdated -= OnPlayerPositionUpdated;
+            networkManager.OnMatchConfigurationUpdated -= RefreshTracker;
+            networkManager.OnPlayerStageProgressUpdated -= OnPlayerStageProgressUpdated;
             subscribed = false;
-        }
-
-        private void OnGameConnected()
-        {
-            latestPositions.Clear();
-            RefreshText();
-        }
-
-        private void OnGameDisconnected()
-        {
-            latestPositions.Clear();
-            RefreshText();
         }
 
         private void OnMatchJoined(string matchId, string playerId)
         {
-            RefreshText();
+            RefreshTracker();
         }
 
-        private void OnPlayerPositionUpdated(string playerId, float x, float y, float vx, float vy)
+        private void OnPlayerStageProgressUpdated(string playerId, int currentStageIndex)
         {
-            latestPositions[playerId] = new Vector2(x, y);
-            RefreshText();
+            UpdateSingleRow(playerId);
         }
 
-        private void RefreshText()
+        private void RefreshTracker()
         {
-            if (hudText == null) return;
-
-            if (networkManager == null || !networkManager.IsConnected)
+            if (panelRoot == null || titleText == null || statusText == null)
             {
-                hudText.text = "";
                 return;
             }
 
-            var sb = new StringBuilder();
-            sb.AppendLine($"<color=#{ColorToHex(labelColor)}>Opponent Positions</color>");
-
-            string selfId = networkManager.CurrentPlayerId;
-            bool hasOpponent = false;
-
-            foreach (KeyValuePair<string, Vector2> kv in latestPositions)
+            bool hasLocalPlayer = FindAnyObjectByType<PlayerController>() != null;
+            panelRoot.gameObject.SetActive(hasLocalPlayer);
+            if (!hasLocalPlayer)
             {
-                bool isSelf = !string.IsNullOrEmpty(selfId) && kv.Key == selfId;
-                Color lineCol = isSelf ? selfColor : valueColor;
-                string label = isSelf ? $"You ({kv.Key})" : kv.Key;
-                if (!isSelf) hasOpponent = true;
-
-                sb.AppendLine($"<color=#{ColorToHex(lineCol)}>{label}: x={kv.Value.x:F2}, y={kv.Value.y:F2}</color>");
+                ClearRows();
+                return;
             }
 
-            if (!hasOpponent)
+            titleText.gameObject.SetActive(false);
+            statusText.gameObject.SetActive(true);
+
+            if (networkManager == null)
             {
-                sb.Append($"<color=#{ColorToHex(labelColor)}>waiting opponent position...</color>");
+                statusText.text = "Loading map...";
+                ClearRows();
+                return;
             }
 
-            hudText.text = sb.ToString();
-            hudText.ForceMeshUpdate();
-            Canvas.ForceUpdateCanvases();
+            if (!networkManager.IsConnected)
+            {
+                statusText.text = "Loading map...";
+                ClearRows();
+                return;
+            }
+
+            if (!networkManager.HasMatchConfiguration)
+            {
+                statusText.text = "Loading map...";
+                ClearRows();
+                return;
+            }
+
+            statusText.gameObject.SetActive(false);
+
+            string currentPlayerId = networkManager.CurrentPlayerId;
+            if (string.IsNullOrWhiteSpace(currentPlayerId) ||
+                !networkManager.TryGetPlayerMatchState(currentPlayerId, out MatchPlayerState currentPlayerState) ||
+                currentPlayerState == null)
+            {
+                statusText.gameObject.SetActive(true);
+                statusText.text = "Loading map...";
+                ClearRows();
+                return;
+            }
+
+            EnsureRow(currentPlayerState);
+            UpdateSingleRow(currentPlayerId);
+
+            if (rowsByPlayerId.TryGetValue(currentPlayerId, out PlayerTrackerRow currentRow) && currentRow.root != null)
+            {
+                currentRow.root.SetSiblingIndex(1);
+            }
+
+            List<string> staleIds = null;
+            foreach (KeyValuePair<string, PlayerTrackerRow> kv in rowsByPlayerId)
+            {
+                if (string.Equals(kv.Key, currentPlayerId, System.StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                if (staleIds == null) staleIds = new List<string>();
+                staleIds.Add(kv.Key);
+            }
+
+            if (staleIds == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < staleIds.Count; i++)
+            {
+                RemoveRow(staleIds[i]);
+            }
         }
 
-        private static string ColorToHex(Color c)
+        private void EnsureRow(MatchPlayerState playerState)
         {
-            Color32 c32 = c;
-            return $"{c32.r:X2}{c32.g:X2}{c32.b:X2}";
+            if (rowsByPlayerId.ContainsKey(playerState.player_id))
+            {
+                return;
+            }
+
+            GameObject rowGo = new GameObject($"Tracker_{playerState.player_id}", typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            rowGo.transform.SetParent(panelRoot, false);
+            RectTransform rowRect = rowGo.GetComponent<RectTransform>();
+            rowRect.sizeDelta = new Vector2(0f, 0f);
+
+            Image background = rowGo.GetComponent<Image>();
+            background.color = new Color(0f, 0f, 0f, 0f);
+
+            VerticalLayoutGroup layout = rowGo.GetComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(0, 0, 0, 0);
+            layout.spacing = 0f;
+            layout.childControlWidth = true;
+            layout.childControlHeight = false;
+            layout.childForceExpandHeight = false;
+            layout.childForceExpandWidth = true;
+
+            ContentSizeFitter fitter = rowGo.GetComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+            GameObject trackGo = new GameObject("Track", typeof(RectTransform), typeof(Image), typeof(Outline), typeof(LayoutElement));
+            trackGo.transform.SetParent(rowRect, false);
+            RectTransform trackRect = trackGo.GetComponent<RectTransform>();
+            trackRect.sizeDelta = new Vector2(TrackWidth, TrackHeight);
+
+            Image trackImage = trackGo.GetComponent<Image>();
+            trackImage.color = trackColor;
+            trackImage.raycastTarget = false;
+
+            Outline outline = trackGo.GetComponent<Outline>();
+            outline.effectColor = trackOutlineColor;
+            outline.effectDistance = new Vector2(TrackOutlineOffset, -TrackOutlineOffset);
+            outline.useGraphicAlpha = true;
+
+            LayoutElement trackLayout = trackGo.GetComponent<LayoutElement>();
+            trackLayout.preferredWidth = TrackWidth;
+            trackLayout.preferredHeight = TrackHeight;
+            trackLayout.minHeight = TrackHeight;
+
+            PlayerTrackerRow row = new PlayerTrackerRow
+            {
+                playerId = playerState.player_id,
+                root = rowRect,
+                background = background,
+                trackRect = trackRect
+            };
+
+            rowsByPlayerId[playerState.player_id] = row;
+        }
+
+        private void UpdateSingleRow(string playerId)
+        {
+            if (networkManager == null ||
+                !networkManager.TryGetPlayerMatchState(playerId, out MatchPlayerState playerState) ||
+                !rowsByPlayerId.TryGetValue(playerId, out PlayerTrackerRow row))
+            {
+                return;
+            }
+
+            int currentStageIndex = networkManager.GetPlayerCurrentStageIndex(playerId, playerState.current_stage_index);
+            bool isSelf = string.Equals(playerState.player_id, networkManager.CurrentPlayerId, System.StringComparison.Ordinal);
+            row.background.color = isSelf ? new Color(selfPanelBackground.r, selfPanelBackground.g, selfPanelBackground.b, 0.12f) : new Color(panelBackground.r, panelBackground.g, panelBackground.b, 0.08f);
+
+            int displayColorIndex = ResolveDisplayColorIndex(playerState);
+            UpdateRouteIcons(row, playerState, currentStageIndex, displayColorIndex);
+        }
+
+        private void ClearRows()
+        {
+            List<string> ids = new List<string>(rowsByPlayerId.Keys);
+            for (int i = 0; i < ids.Count; i++)
+            {
+                RemoveRow(ids[i]);
+            }
+        }
+
+        private void RemoveRow(string playerId)
+        {
+            if (!rowsByPlayerId.TryGetValue(playerId, out PlayerTrackerRow row))
+            {
+                return;
+            }
+
+            rowsByPlayerId.Remove(playerId);
+            if (row.root != null)
+            {
+                Destroy(row.root.gameObject);
+            }
+        }
+
+        private static StageLocationPresentation ResolveStageLocation(MatchPlayerState playerState, int currentStageIndex)
+        {
+            if (currentStageIndex <= 0)
+            {
+                return FixedStartPresentation;
+            }
+
+            if (playerState != null &&
+                playerState.stage_order != null &&
+                currentStageIndex - 1 >= 0 &&
+                currentStageIndex - 1 < playerState.stage_order.Length)
+            {
+                return ResolveStageOrderValue(playerState.stage_order[currentStageIndex - 1]);
+            }
+
+            if (playerState != null && playerState.stage_order != null && currentStageIndex > playerState.stage_order.Length)
+            {
+                return FixedGoalPresentation;
+            }
+
+            return new StageLocationPresentation
+            {
+                hasSprite = false,
+                visualKind = LocationVisualKind.Home,
+                label = $"Stage {currentStageIndex}"
+            };
+        }
+
+        private void UpdateRouteIcons(PlayerTrackerRow row, MatchPlayerState playerState, int currentStageIndex, int displayColorIndex)
+        {
+            if (row.trackRect == null || locationSpriteDatabase == null)
+            {
+                return;
+            }
+
+            List<StageLocationPresentation> routeStages = BuildRouteStages(playerState);
+            int routeStopCount = Mathf.Max(routeStages.Count, 1);
+
+            while (row.routeStops.Count < routeStopCount)
+            {
+                GameObject stopGo = new GameObject($"RouteStop_{row.routeStops.Count}", typeof(RectTransform), typeof(Image), typeof(Outline));
+                stopGo.transform.SetParent(row.trackRect, false);
+
+                RectTransform stopRect = stopGo.GetComponent<RectTransform>();
+                stopRect.anchorMin = new Vector2(0.5f, 0.5f);
+                stopRect.anchorMax = new Vector2(0.5f, 0.5f);
+                stopRect.pivot = new Vector2(0.5f, 0.5f);
+                stopRect.sizeDelta = new Vector2(RouteStopBaseSize, RouteStopBaseSize);
+
+                Image slotImage = stopGo.GetComponent<Image>();
+                slotImage.color = checkpointColor;
+                slotImage.raycastTarget = false;
+
+                Outline slotOutline = stopGo.GetComponent<Outline>();
+                slotOutline.effectColor = new Color(1f, 1f, 1f, 0f);
+                slotOutline.effectDistance = new Vector2(2f, -2f);
+                slotOutline.useGraphicAlpha = true;
+
+                GameObject iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                iconGo.transform.SetParent(stopRect, false);
+                RectTransform iconRect = iconGo.GetComponent<RectTransform>();
+                iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                iconRect.pivot = new Vector2(0.5f, 0.5f);
+                iconRect.sizeDelta = new Vector2(RouteIconBaseSize, RouteIconBaseSize);
+
+                Image iconImage = iconGo.GetComponent<Image>();
+                iconImage.preserveAspect = true;
+                iconImage.raycastTarget = false;
+
+                row.routeStops.Add(new RouteStopVisual
+                {
+                    root = stopRect,
+                    slotImage = slotImage,
+                    slotOutline = slotOutline,
+                    iconImage = iconImage
+                });
+            }
+
+            int currentStop = Mathf.Clamp(currentStageIndex, 0, routeStopCount - 1);
+
+            for (int i = 0; i < row.routeStops.Count; i++)
+            {
+                bool active = i < routeStages.Count;
+                RouteStopVisual routeStop = row.routeStops[i];
+                routeStop.root.gameObject.SetActive(active);
+                if (!active)
+                {
+                    continue;
+                }
+
+                float x = CalculateTrackX(row.trackRect, routeStopCount, i);
+                routeStop.root.anchoredPosition = new Vector2(x, 0f);
+
+                StageLocationPresentation routeStage = routeStages[i];
+                Sprite sprite = routeStage.hasSprite
+                    ? locationSpriteDatabase.GetSprite(displayColorIndex, routeStage.visualKind)
+                    : null;
+                bool isCurrent = i == currentStop;
+                bool isReached = i <= currentStop;
+                Color themeColor = GetTrackerThemeColor(displayColorIndex);
+                Color reachedSlotColor = new Color(themeColor.r, themeColor.g, themeColor.b, 0.35f);
+                Color currentSlotThemeColor = Color.Lerp(themeColor, Color.white, 0.18f);
+
+                routeStop.slotImage.color = isCurrent
+                    ? currentSlotThemeColor
+                    : isReached
+                        ? new Color(reachedSlotColor.r, reachedSlotColor.g, reachedSlotColor.b, 0.95f)
+                        : new Color(reachedSlotColor.r, reachedSlotColor.g, reachedSlotColor.b, 0.45f);
+                routeStop.slotOutline.effectColor = isCurrent ? themeColor : new Color(1f, 1f, 1f, 0f);
+                routeStop.root.sizeDelta = isCurrent
+                    ? new Vector2(RouteStopCurrentSize, RouteStopCurrentSize)
+                    : new Vector2(RouteStopBaseSize, RouteStopBaseSize);
+
+                routeStop.iconImage.sprite = sprite;
+                routeStop.iconImage.enabled = sprite != null;
+                routeStop.iconImage.color = isCurrent
+                    ? Color.white
+                    : isReached
+                        ? new Color(1f, 1f, 1f, 0.94f)
+                        : new Color(1f, 1f, 1f, 0.50f);
+                routeStop.iconImage.rectTransform.sizeDelta = isCurrent
+                    ? new Vector2(RouteIconCurrentSize, RouteIconCurrentSize)
+                    : new Vector2(RouteIconBaseSize, RouteIconBaseSize);
+
+                if (isCurrent)
+                {
+                    routeStop.root.SetAsLastSibling();
+                }
+            }
+        }
+
+        private int ResolveDisplayColorIndex(MatchPlayerState playerState)
+        {
+            bool isSelf = networkManager != null &&
+                          playerState != null &&
+                          string.Equals(playerState.player_id, networkManager.CurrentPlayerId, System.StringComparison.Ordinal);
+
+            int characterIndex;
+            if (isSelf && localPlayerController != null)
+            {
+                characterIndex = Mathf.Clamp(localPlayerController.selectedCharacterIndex, 0, 3);
+            }
+            else
+            {
+                characterIndex = Mathf.Clamp(playerState != null ? playerState.color_index : 0, 0, 3);
+            }
+
+            if (characterIndex < CharacterToLocationColorMap.Length)
+            {
+                return CharacterToLocationColorMap[characterIndex];
+            }
+
+            return characterIndex;
+        }
+
+        private static Color GetTrackerThemeColor(int colorIndex)
+        {
+            return Mathf.Clamp(colorIndex, 0, 3) switch
+            {
+                1 => new Color(0.73f, 0.97f, 0.47f, 1f),
+                2 => new Color(0.45f, 0.87f, 0.97f, 1f),
+                3 => new Color(0.72f, 0.52f, 0.96f, 1f),
+                _ => new Color(0.98f, 0.51f, 0.51f, 1f)
+            };
+        }
+
+        private static List<StageLocationPresentation> BuildRouteStages(MatchPlayerState playerState)
+        {
+            List<StageLocationPresentation> stages = new List<StageLocationPresentation>();
+            if (playerState == null)
+            {
+                return stages;
+            }
+
+            stages.Add(FixedStartPresentation);
+
+            if (playerState.stage_order != null)
+            {
+                for (int i = 0; i < playerState.stage_order.Length; i++)
+                {
+                    stages.Add(ResolveStageOrderValue(playerState.stage_order[i]));
+                }
+            }
+
+            stages.Add(FixedGoalPresentation);
+
+            return stages;
+        }
+
+        private static float CalculateTrackX(RectTransform trackRect, int routeStopCount, int stopIndex)
+        {
+            float trackWidth = Mathf.Max(trackRect.rect.width, 0f);
+            float usableWidth = Mathf.Max(trackWidth - (TrackHorizontalPadding * 2f), 0f);
+            float leftEdge = -trackWidth * 0.5f + TrackHorizontalPadding;
+
+            if (routeStopCount <= 1)
+            {
+                return leftEdge + usableWidth * 0.5f;
+            }
+
+            float slotWidth = usableWidth / routeStopCount;
+            return leftEdge + slotWidth * (stopIndex + 0.5f);
+        }
+
+        private static StageLocationPresentation ResolveStageOrderValue(int stageOrderValue)
+        {
+            return stageOrderValue switch
+            {
+                0 => new StageLocationPresentation
+                {
+                    hasSprite = true,
+                    visualKind = LocationVisualKind.Home,
+                    label = "Home"
+                },
+                1 => new StageLocationPresentation
+                {
+                    hasSprite = true,
+                    visualKind = LocationVisualKind.Sasuke,
+                    label = "SASUKE"
+                },
+                2 => new StageLocationPresentation
+                {
+                    hasSprite = true,
+                    visualKind = LocationVisualKind.Animal,
+                    label = "Animal"
+                },
+                4 => new StageLocationPresentation
+                {
+                    hasSprite = true,
+                    visualKind = LocationVisualKind.Mountain,
+                    label = "Mountain"
+                },
+                3 => new StageLocationPresentation
+                {
+                    hasSprite = true,
+                    visualKind = LocationVisualKind.Straight,
+                    label = "Straight"
+                },
+                _ => new StageLocationPresentation
+                {
+                    hasSprite = false,
+                    visualKind = LocationVisualKind.Home,
+                    label = $"Stage {stageOrderValue + 1}"
+                }
+            };
+        }
+
+        private static TextMeshProUGUI CreateText(string name, RectTransform parent, float fontSize, FontStyles style, Color color)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+
+            TextMeshProUGUI text = go.AddComponent<TextMeshProUGUI>();
+            text.font = ResolveFontAsset();
+            if (text.font != null)
+            {
+                text.fontSharedMaterial = text.font.material;
+            }
+            text.fontSize = fontSize;
+            text.fontStyle = style;
+            text.color = color;
+            text.raycastTarget = false;
+            text.textWrappingMode = TextWrappingModes.NoWrap;
+            text.enableWordWrapping = false;
+            return text;
+        }
+
+        private static TMP_FontAsset ResolveFontAsset()
+        {
+            if (TMP_Settings.defaultFontAsset != null) return TMP_Settings.defaultFontAsset;
+            return Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
         }
     }
 }

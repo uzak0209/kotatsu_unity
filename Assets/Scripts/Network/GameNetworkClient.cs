@@ -6,16 +6,16 @@ namespace Kotatsu.Network
     public class GameNetworkClient
     {
         private SimpleUdpClient udpClient;
-        private int posSeq = 0;
-        private int paramSeq = 0;
+        private int posSeq;
+        private int paramSeq;
 
-        // Events
         public event Action OnConnected;
         public event Action OnDisconnected;
         public event Action<JoinOkMessage> OnJoinOk;
         public event Action<MatchStartedMessage> OnMatchStarted;
         public event Action<ParamAppliedMessage> OnParamApplied;
         public event Action<PosBroadcastMessage> OnPositionUpdate;
+        public event Action<StageProgressBroadcastMessage> OnStageProgressUpdate;
         public event Action<ErrorMessage> OnError;
         public event Action<string> OnRawError;
 
@@ -24,13 +24,11 @@ namespace Kotatsu.Network
         public void Initialize()
         {
             udpClient = new SimpleUdpClient();
-
-            // Setup event handlers
             udpClient.OnConnected += () => OnConnected?.Invoke();
             udpClient.OnDisconnected += () => OnDisconnected?.Invoke();
             udpClient.OnReliableMessage += HandleReliableMessage;
             udpClient.OnUnreliableMessage += HandleUnreliableMessage;
-            udpClient.OnError += (error) =>
+            udpClient.OnError += error =>
             {
                 Debug.LogError($"UDP error: {error}");
                 OnRawError?.Invoke(error);
@@ -53,7 +51,6 @@ namespace Kotatsu.Network
             udpClient?.Disconnect();
         }
 
-        // Send join message (Reliable)
         public void SendJoin(string token)
         {
             if (!IsConnected)
@@ -63,11 +60,9 @@ namespace Kotatsu.Network
             }
 
             JoinMessage msg = new JoinMessage { token = token };
-            string json = JsonUtility.ToJson(msg);
-            udpClient.SendReliable(json);
+            udpClient.SendReliable(JsonUtility.ToJson(msg));
         }
 
-        // Send parameter change (Reliable)
         public void SendParamChange(string param, string direction)
         {
             if (!IsConnected)
@@ -82,16 +77,14 @@ namespace Kotatsu.Network
                 param = param,
                 direction = direction
             };
-            string json = JsonUtility.ToJson(msg);
-            udpClient.SendReliable(json);
+            udpClient.SendReliable(JsonUtility.ToJson(msg));
         }
 
-        // Send position update (Unreliable)
         public void SendPosition(float x, float y, float vx, float vy)
         {
             if (!IsConnected)
             {
-                return; // Silently ignore if not connected
+                return;
             }
 
             PosMessage msg = new PosMessage
@@ -102,14 +95,29 @@ namespace Kotatsu.Network
                 vx = vx,
                 vy = vy
             };
-            string json = JsonUtility.ToJson(msg);
-            udpClient.SendUnreliable(json);
+            udpClient.SendUnreliable(JsonUtility.ToJson(msg));
+        }
+
+        public void SendStageProgress(int currentStageIndex)
+        {
+            if (!IsConnected)
+            {
+                return;
+            }
+
+            StageProgressMessage msg = new StageProgressMessage
+            {
+                current_stage_index = currentStageIndex
+            };
+            udpClient.SendUnreliable(JsonUtility.ToJson(msg));
         }
 
         private void HandleReliableMessage(string json)
         {
             if (string.IsNullOrEmpty(json))
+            {
                 return;
+            }
 
             INetworkMessage msg = MessageParser.Parse(json);
             if (msg == null)
@@ -141,12 +149,14 @@ namespace Kotatsu.Network
         private void HandleUnreliableMessage(string json)
         {
             if (string.IsNullOrEmpty(json))
+            {
                 return;
+            }
 
             INetworkMessage msg = MessageParser.Parse(json);
             if (msg == null)
             {
-                return; // Silently ignore malformed unreliable messages
+                return;
             }
 
             switch (msg.t)
@@ -154,8 +164,8 @@ namespace Kotatsu.Network
                 case "pos":
                     OnPositionUpdate?.Invoke(msg as PosBroadcastMessage);
                     break;
-                default:
-                    // Silently ignore unknown unreliable messages
+                case "stage_progress":
+                    OnStageProgressUpdate?.Invoke(msg as StageProgressBroadcastMessage);
                     break;
             }
         }

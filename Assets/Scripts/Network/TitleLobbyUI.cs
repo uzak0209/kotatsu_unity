@@ -30,6 +30,8 @@ namespace Kotatsu.Network
             LobbyCreate,
             LobbyJoin,
         }
+        [SerializeField]
+        private GameObject[] selectObject;
 
         private const string KnownLobbiesPrefsKey = "Kotatsu.Network.KnownLobbies";
         private const int MaxKnownLobbies = 6;
@@ -126,6 +128,24 @@ namespace Kotatsu.Network
             }
 
             SyncKnownLobbySelectionFromEventSystem();
+            // switch (sceneMode)
+            // {
+            //     case UiSceneMode.LobbyCreate:
+            //         selectObject[0].SetActive(true);
+            //         selectObject[1].SetActive(false);
+            //         selectObject[2].SetActive(false);
+            //         break;
+            //     case UiSceneMode.LobbyJoin:
+            //         selectObject[0].SetActive(false);
+            //         selectObject[1].SetActive(true);
+            //         selectObject[2].SetActive(false);
+            //          break;
+            //     case UiSceneMode.TitleMenu:
+            //         selectObject[0].SetActive(false);
+            //         selectObject[1].SetActive(false);
+            //         selectObject[2].SetActive(true);
+            //         break;
+            // }
         }
 
         private void OnDestroy()
@@ -1580,6 +1600,10 @@ namespace Kotatsu.Network
                 if (navigable[i] != null && navigable[i].gameObject == selected)
                 {
                     currentIndex = i;
+                    Debug.Log($"Current selected index: {currentIndex}");
+                    for (int j = 0; j < 3; j++) {
+                        selectObject[j].SetActive(j == i);
+                    }
                     break;
                 }
             }
@@ -1593,6 +1617,10 @@ namespace Kotatsu.Network
             int direction = moveUp ? -1 : 1;
             int nextIndex = (currentIndex + direction + navigable.Count) % navigable.Count;
             eventSystem.SetSelectedGameObject(navigable[nextIndex].gameObject);
+            // Debug.Log(nextIndex);
+            // for (int i = 0; i < 3; i++) {
+            //     selectObject[i].SetActive(i == nextIndex);
+            // }
         }
 
         private void HandleKeyboardSubmitFallback()

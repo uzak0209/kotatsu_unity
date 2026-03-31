@@ -122,8 +122,10 @@ namespace Kotatsu.Network
             networkManager.OnGameConnected += OnGameConnected;
             networkManager.OnGameDisconnected += OnGameDisconnected;
             networkManager.OnMatchJoined += OnMatchJoined;
+            networkManager.OnMatchConfigurationUpdated += OnMatchConfigurationUpdated;
             networkManager.OnPlayerPositionUpdated += OnPlayerPositionUpdated;
             subscribed = true;
+            RefreshAvatarLooks();
         }
 
         private void Unsubscribe()
@@ -133,6 +135,7 @@ namespace Kotatsu.Network
             networkManager.OnGameConnected -= OnGameConnected;
             networkManager.OnGameDisconnected -= OnGameDisconnected;
             networkManager.OnMatchJoined -= OnMatchJoined;
+            networkManager.OnMatchConfigurationUpdated -= OnMatchConfigurationUpdated;
             networkManager.OnPlayerPositionUpdated -= OnPlayerPositionUpdated;
             subscribed = false;
         }
@@ -150,6 +153,11 @@ namespace Kotatsu.Network
         private void OnMatchJoined(string matchId, string playerId)
         {
             ClearAvatars();
+        }
+
+        private void OnMatchConfigurationUpdated()
+        {
+            RefreshAvatarLooks();
         }
 
         private void OnPlayerPositionUpdated(string playerId, float x, float y, float vx, float vy)
@@ -199,8 +207,34 @@ namespace Kotatsu.Network
                 hasInitialPosition = false
             };
             avatarsByPlayerId[playerId] = created;
+            ApplyAssignedLook(created);
 
             return created;
+        }
+
+        private void RefreshAvatarLooks()
+        {
+            foreach (KeyValuePair<string, RemoteAvatar> kv in avatarsByPlayerId)
+            {
+                ApplyAssignedLook(kv.Value);
+            }
+        }
+
+        private void ApplyAssignedLook(RemoteAvatar avatar)
+        {
+            if (avatar == null || avatar.gameObject == null || networkManager == null)
+            {
+                return;
+            }
+
+            SketchCharacterLook look = avatar.gameObject.GetComponent<SketchCharacterLook>();
+            if (look == null)
+            {
+                return;
+            }
+
+            int variantIndex = networkManager.GetAssignedColorIndex(avatar.playerId, 0);
+            look.SetVariantIndex(variantIndex);
         }
 
         private void RemoveAvatar(string playerId)
