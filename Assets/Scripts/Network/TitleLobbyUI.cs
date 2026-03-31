@@ -396,7 +396,7 @@ namespace Kotatsu.Network
 
             if (titleVisual != null)
             {
-                titleVisual.gameObject.SetActive(sceneMode != UiSceneMode.LobbyJoin);
+                // titleVisual.gameObject.SetActive(sceneMode != UiSceneMode.LobbyJoin);
             }
         }
 
@@ -555,7 +555,7 @@ namespace Kotatsu.Network
             inputText.font = font;
             inputText.fontSize = 18;
             inputText.alignment = TextAnchor.MiddleLeft;
-            inputText.color = Color.white;
+            inputText.color = Color.black;
             inputText.raycastTarget = false;
             inputText.supportRichText = false;
 
@@ -594,7 +594,7 @@ namespace Kotatsu.Network
             tmp.font = ResolveUiFont();
             tmp.fontSize = 22f;
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
-            tmp.color = Color.white;
+            tmp.color = Color.black;
             tmp.raycastTarget = false;
             ConfigureStatusTextAppearance(tmp);
             tmp.text = "";
@@ -629,7 +629,7 @@ namespace Kotatsu.Network
             tmp.font = ResolveUiFont();
             tmp.fontSize = 22f;
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
-            tmp.color = Color.white;
+            tmp.color = Color.black;
             tmp.raycastTarget = false;
             ConfigureLobbyInfoTextAppearance(tmp);
             tmp.text = "";
@@ -713,7 +713,7 @@ namespace Kotatsu.Network
             var header = headerGo.AddComponent<TextMeshProUGUI>();
             header.font = ResolveUiFont();
             header.fontSize = 20f;
-            header.color = Color.white;
+            header.color = Color.black;
             header.alignment = TextAlignmentOptions.Left;
             header.text = "ロビー一覧";
         }
@@ -733,7 +733,7 @@ namespace Kotatsu.Network
             var emptyText = emptyGo.AddComponent<TextMeshProUGUI>();
             emptyText.font = ResolveUiFont();
             emptyText.fontSize = 16f;
-            emptyText.color = new Color(1f, 1f, 1f, 0.75f);
+            emptyText.color = new Color(0f, 0f, 0f, 0.75f);
             emptyText.alignment = TextAlignmentOptions.TopLeft;
             emptyText.textWrappingMode = TextWrappingModes.Normal;
             emptyText.text = "参加できるロビーがありません。";
